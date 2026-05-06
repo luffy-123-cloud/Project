@@ -4,6 +4,7 @@ import {
   synthesizeSarpanchSpeech,
   type SarpanchSpeechAudio,
 } from '../services/gemini/geminiClient'
+import { detectSpeechLanguage } from '../utils/speechLanguage'
 
 export type VoiceAgentState = 'idle' | 'listening' | 'processing' | 'speaking' | 'error'
 
@@ -21,9 +22,12 @@ const LANG_BCP47: Record<string, string> = {
   bn: 'bn-IN',
   ta: 'ta-IN',
   pa: 'pa-Guru-IN',
+  mr: 'mr-IN',
+  te: 'te-IN',
+  gu: 'gu-IN',
 }
 
-const GEMINI_TTS_SOFT_TIMEOUT_MS = 650
+const GEMINI_TTS_SOFT_TIMEOUT_MS = 5500
 
 const decodeBase64Pcm = (base64Data: string): Int16Array => {
   const binary = atob(base64Data)
@@ -219,7 +223,7 @@ export function useVoiceAgent(
   )
 
   const speakWithBrowser = useCallback(
-    (text: string): Promise<void> => {
+    (text: string, speechLanguage: string): Promise<void> => {
       if (!window.speechSynthesis) {
         return Promise.reject(new Error('SpeechSynthesis is unavailable'))
       }
@@ -228,12 +232,14 @@ export function useVoiceAgent(
 
       return new Promise((resolve, reject) => {
         const utterance = new SpeechSynthesisUtterance(text)
-        utterance.lang = LANG_BCP47[language] || 'en-IN'
-        utterance.rate = 0.92
+        utterance.lang = LANG_BCP47[speechLanguage] || LANG_BCP47[language] || 'en-IN'
+        utterance.rate = speechLanguage === 'en' ? 0.9 : 0.86
         utterance.pitch = 1
 
         const voices = window.speechSynthesis.getVoices()
-        const preferred = voices.find(voice => voice.lang.startsWith(utterance.lang.slice(0, 2)))
+        const preferred =
+          voices.find(voice => voice.lang === utterance.lang) ||
+          voices.find(voice => voice.lang.startsWith(utterance.lang.slice(0, 2)))
         if (preferred) utterance.voice = preferred
 
         utterance.onend = () => resolve()
@@ -262,27 +268,26 @@ export function useVoiceAgent(
 
       setState('speaking')
       setError(null)
+      const speechProfile = detectSpeechLanguage(clean, language)
 
       try {
-        // Start with browser TTS for lowest perceived latency.
-        // Gemini TTS is kept as a fallback path below.
-        await speakWithBrowser(clean)
+        const geminiAudio = await withTimeout(
+          synthesizeSarpanchSpeech({ text: clean, language: speechProfile.language }),
+          GEMINI_TTS_SOFT_TIMEOUT_MS
+        ).catch(() => null)
+        if (abortRef.current) return
+
+        if (!geminiAudio) {
+          throw new Error('Gemini TTS unavailable')
+        }
+
+        await playGeminiAudio(geminiAudio)
         if (!abortRef.current) setState('idle')
       } catch {
         if (abortRef.current) return
 
         try {
-          const geminiAudio = await withTimeout(
-            synthesizeSarpanchSpeech({ text: clean, language }),
-            GEMINI_TTS_SOFT_TIMEOUT_MS
-          ).catch(() => null)
-          if (abortRef.current) return
-
-          if (!geminiAudio) {
-            throw new Error('Gemini TTS unavailable')
-          }
-
-          await playGeminiAudio(geminiAudio)
+          await speakWithBrowser(clean, speechProfile.language)
           if (!abortRef.current) setState('idle')
         } catch {
           const errorMessage = 'Unable to play voice response. Please tap and try again.'
@@ -410,4 +415,3 @@ export function useVoiceAgent(
     speak,
   }
 }
-

@@ -277,7 +277,7 @@ Annual income: ₹${incomeValue.toLocaleString('en-IN')}
 Water source: ${farmer?.waterSource || 'rain-fed'}
 
 List additional applicable schemes not commonly known.`,
-        model: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'],
+        model: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'],
       })
       setAiSchemes(result)
     } catch {

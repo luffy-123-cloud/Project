@@ -157,11 +157,16 @@ export const getMockMarketPrices = (): MarketPrice[] => [
   { id: '1', commodity: 'Tomato', mandi: 'Nashik', state: 'Maharashtra', pricePerQuintal: 1240, trend: 'up', trendPercent: 8, updatedAt: new Date().toISOString(), color: 'green' },
   { id: '2', commodity: 'Onion', mandi: 'Lasalgaon', state: 'Maharashtra', pricePerQuintal: 890, trend: 'down', trendPercent: -5, updatedAt: new Date().toISOString(), color: 'red' },
   { id: '3', commodity: 'Wheat', mandi: 'Delhi', state: 'Delhi', pricePerQuintal: 2150, trend: 'stable', trendPercent: 0, updatedAt: new Date().toISOString(), color: 'yellow' },
+  { id: '3-1', commodity: 'Wheat', mandi: 'Karnal', state: 'Haryana', pricePerQuintal: 2100, trend: 'down', trendPercent: -1, updatedAt: new Date().toISOString(), color: 'red' },
+  { id: '3-2', commodity: 'Wheat', mandi: 'Ludhiana', state: 'Punjab', pricePerQuintal: 2200, trend: 'up', trendPercent: 2, updatedAt: new Date().toISOString(), color: 'green' },
   { id: '4', commodity: 'Potato', mandi: 'Agra', state: 'Uttar Pradesh', pricePerQuintal: 680, trend: 'up', trendPercent: 3, updatedAt: new Date().toISOString(), color: 'green' },
   { id: '5', commodity: 'Soybean', mandi: 'Indore', state: 'Madhya Pradesh', pricePerQuintal: 4200, trend: 'down', trendPercent: -2, updatedAt: new Date().toISOString(), color: 'red' },
   { id: '6', commodity: 'Cotton', mandi: 'Nagpur', state: 'Maharashtra', pricePerQuintal: 6800, trend: 'up', trendPercent: 5, updatedAt: new Date().toISOString(), color: 'green' },
   { id: '7', commodity: 'Rice', mandi: 'Kolkata', state: 'West Bengal', pricePerQuintal: 1950, trend: 'stable', trendPercent: 0, updatedAt: new Date().toISOString(), color: 'yellow' },
   { id: '8', commodity: 'Maize', mandi: 'Pune', state: 'Maharashtra', pricePerQuintal: 1380, trend: 'up', trendPercent: 4, updatedAt: new Date().toISOString(), color: 'green' },
+  { id: '8-1', commodity: 'Maize', mandi: 'Belagavi', state: 'Karnataka', pricePerQuintal: 1450, trend: 'stable', trendPercent: 0, updatedAt: new Date().toISOString(), color: 'yellow' },
+  { id: '8-2', commodity: 'Maize', mandi: 'Hubli', state: 'Karnataka', pricePerQuintal: 1320, trend: 'down', trendPercent: -3, updatedAt: new Date().toISOString(), color: 'red' },
+  { id: '8-3', commodity: 'Maize', mandi: 'Dharwad', state: 'Karnataka', pricePerQuintal: 1400, trend: 'up', trendPercent: 2, updatedAt: new Date().toISOString(), color: 'green' },
 ]
 
 export interface FetchMarketOptions {

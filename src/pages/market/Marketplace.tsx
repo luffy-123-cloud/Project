@@ -60,7 +60,7 @@ export default function Marketplace() {
     const loadSummary = async () => {
       setIsLoading(true)
       try {
-        const result = await getMandiPrice(selectedCrop, location)
+        const result = await getMandiPrice(selectedCrop, location, refreshNonce > 0)
         if (cancelled) return
 
         setSummary(result)

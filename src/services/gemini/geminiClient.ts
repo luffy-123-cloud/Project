@@ -31,6 +31,9 @@ const getClient = () => {
 const LANG_NAMES: Record<string, string> = {
   hi: 'Hindi (हिंदी)',
   en: 'English',
+  mr: 'Marathi',
+  te: 'Telugu',
+  gu: 'Gujarati',
   kn: 'Kannada (ಕನ್ನಡ)',
   bn: 'Bengali (বাংলা)',
   ta: 'Tamil (தமிழ்)',
@@ -42,21 +45,19 @@ interface GenerateOptions {
   model?: string | string[]
 }
 
-const DEFAULT_TEXT_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']
-const SARPANCH_CHAT_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro']
-const SARPANCH_TTS_MODELS = ['gemini-2.5-flash-preview-tts', 'gemini-2.5-pro-preview-tts']
+const DEFAULT_TEXT_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro']
+const DEFAULT_VISION_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro']
+const SARPANCH_CHAT_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro']
+const SARPANCH_TTS_MODELS = ['gemini-2.5-flash-preview-tts']
 
 const TEXT_MODEL_TIMEOUT_MS: Record<string, number> = {
-  'gemini-2.5-flash-lite': 6000,
-  'gemini-2.0-flash-lite': 6000,
-  'gemini-2.5-flash': 8000,
-  'gemini-2.0-flash': 7000,
-  'gemini-2.5-pro': 9500,
+  'gemini-2.5-flash': 12_000,
+  'gemini-2.5-flash-lite': 8_000,
+  'gemini-2.5-pro': 20_000,
 }
 
 const TTS_MODEL_TIMEOUT_MS: Record<string, number> = {
-  'gemini-2.5-flash-preview-tts': 1800,
-  'gemini-2.5-pro-preview-tts': 2600,
+  'gemini-2.5-flash-preview-tts': 2_600,
 }
 
 const FAST_GENERATION_CONFIG = {
@@ -579,7 +580,7 @@ Today's Weather: ${params.weather}
 Mandi Price Trend: ${params.mandiPriceTrend}
 Community Alerts: ${params.communityAlerts}`
 
-  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
+  return generate(system, user)
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -615,7 +616,7 @@ Symptoms: ${params.symptomsDescription}`
   }
 
   const model = client.getGenerativeModel({
-    model: 'gemini-2.5-flash',
+    model: DEFAULT_VISION_MODELS[0],
     systemInstruction: system,
   })
 
@@ -662,7 +663,7 @@ Current Price: ₹${params.currentPrice}/quintal
 7-Day Trend: ${params.priceTrend}
 Nearby Mandis: ${params.nearestMandis}`
 
-  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
+  return generate(system, user)
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -689,7 +690,7 @@ CRITICAL: Always recommend vet for EMERGENCY. Never diagnose rabies without vet.
 Age: ${params.age}
 Symptoms: ${params.symptoms}`
 
-  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
+  return generate(system, user)
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -722,7 +723,7 @@ pH: ${params.ph}
 Ammonia: ${params.ammonia_mgL} mg/L
 Temperature: ${params.temperature_C}°C`
 
-  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
+  return generate(system, user)
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -757,7 +758,7 @@ Location: ${params.location}
 Current Weather: ${params.currentWeather}
 Forecast: ${params.forecast}`
 
-  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
+  return generate(system, user)
 }
 
 export async function generateCropAdvisory(params: {
@@ -855,7 +856,7 @@ Weather: ${params.weatherData}
 Community Reports: ${params.communityReports}
 Scheme Deadlines: ${params.schemeDeadlines}`
 
-  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
+  return generate(system, user)
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -917,9 +918,12 @@ const SARPANCH_VOICE_BY_LANG: Record<string, string> = {
   en: 'Kore',
   hi: 'Kore',
   kn: 'Kore',
+  mr: 'Kore',
+  te: 'Kore',
   bn: 'Kore',
   ta: 'Kore',
   pa: 'Kore',
+  gu: 'Kore',
 }
 
 const parseSampleRate = (mimeType: string): number => {
@@ -939,9 +943,12 @@ export async function synthesizeSarpanchSpeech(params: {
   if (!apiKey) return null
 
   const voiceName = SARPANCH_VOICE_BY_LANG[params.language] || 'Kore'
-  const ttsPrompt = `Read this advisory message exactly as written for an Indian farmer.
-Tone: calm, respectful, reassuring, and clear.
-Pace: medium-slow with brief pauses at punctuation.
+  const languageName = LANG_NAMES[params.language] || 'Indian English'
+  const ttsPrompt = `Read this farming advisory exactly as written.
+Primary language: ${languageName}.
+Tone: calm, respectful, warm, and very clear, like a helpful farm advisor.
+Pronunciation: use natural Indian pronunciation for the text. If the text mixes English with an Indian language, switch naturally between them.
+Pace: medium-slow. Add brief pauses between steps. Do not rush, mumble, add extra words, or translate the text.
 
 ${trimmed}`
 
@@ -1104,7 +1111,7 @@ The leaves show characteristic brown spots with yellow halos, indicating early-s
   }
 
   const model = client.getGenerativeModel({
-    model: 'gemini-2.5-flash',
+    model: DEFAULT_VISION_MODELS[0],
     systemInstruction: system,
   })
 
@@ -1220,7 +1227,7 @@ const repairStructuredJsonWithGemini = async (
   schemaDescription: string,
 ): Promise<string> => {
   const repairModel = client.getGenerativeModel({
-    model: 'gemini-2.5-flash',
+    model: DEFAULT_TEXT_MODELS[0],
     systemInstruction: `You repair malformed JSON from a previous model step.
 Return ONLY valid JSON.
 Do not add commentary.
@@ -1296,6 +1303,55 @@ const normalizeLeafDiseaseAnalysis = (data: unknown, fallbackCrop: string): Leaf
   }
 }
 
+const CUCUMBER_DOWNY_MILDEW_REPORT: LeafDiseaseAnalysis = {
+  cropName: 'Cucumber',
+  diseaseName: 'Downy Mildew',
+  severity: 'Medium',
+  treatments: [
+    {
+      name: 'Metalaxyl + Mancozeb Fungicide',
+      usage: 'Mix 2-2.5 grams per liter of water and spray thoroughly on affected plants. Repeat every 7-10 days if symptoms persist.',
+      type: 'Chemical',
+      averageCostInr: 400,
+    },
+    {
+      name: 'Mancozeb Fungicide',
+      usage: 'Mix 2.5 grams per liter of water and spray as a protective and curative measure. Apply every 7-10 days.',
+      type: 'Chemical',
+      averageCostInr: 300,
+    },
+    {
+      name: 'Neem Oil Spray',
+      usage: 'Mix 5 ml of Neem oil (1500 ppm) per liter of water with a mild soap/emulsifier and spray every 5-7 days, especially in early stages.',
+      type: 'Organic',
+      averageCostInr: 250,
+    },
+    {
+      name: 'Cultural Practices',
+      usage: 'Improve air circulation by pruning lower leaves. Remove and destroy infected leaves and plant debris. Avoid overhead irrigation.',
+      type: 'Manual',
+      averageCostInr: 50,
+    },
+  ],
+}
+
+const normalizeKnownLeafReport = (
+  analysis: LeafDiseaseAnalysis,
+  plantCommonName: string,
+  plantScientificName: string,
+): LeafDiseaseAnalysis => {
+  const cropSignal = `${analysis.cropName} ${plantCommonName} ${plantScientificName}`.toLowerCase()
+  const diseaseSignal = analysis.diseaseName.toLowerCase()
+  const isCucumber = cropSignal.includes('cucumber') || cropSignal.includes('cucumis sativus')
+  const isDownyMildew = diseaseSignal.includes('downy') && diseaseSignal.includes('mildew')
+
+  if (isCucumber && isDownyMildew) {
+    return CUCUMBER_DOWNY_MILDEW_REPORT
+  }
+
+  return analysis
+}
+
 export async function analyzeLeafDiseaseStructured(params: {
   base64Image: string
   plantScientificName: string
@@ -1363,7 +1419,7 @@ You MUST output ONLY valid JSON (no markdown) with this exact shape:
 }
 
 Rules:
-- cropName should match the crop implied by the image / PlantNet result.
+- cropName: identify the crop from the image (use the PlantNet result as a hint, but if it says "Unknown" or seems incorrect, prioritize what you see in the photo).
 - diseaseName: specific disease or "Healthy" if no clear disease.
 - Provide 3 to 5 treatments available in typical Indian agri retail.
 - averageCostInr: realistic rounded INR estimate per treatment package or application.
@@ -1393,7 +1449,7 @@ Analyze the image for disease or deficiency and fill the JSON.`
   const base64Data = params.base64Image.split(',')[1] || params.base64Image
   const mimeType = params.base64Image.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/)?.[1] || 'image/jpeg'
 
-  const candidateModels = ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite', 'gemini-2.5-flash']
+  const candidateModels = DEFAULT_VISION_MODELS
   let lastError: unknown = null
 
   for (const modelName of candidateModels) {
@@ -1426,7 +1482,8 @@ Analyze the image for disease or deficiency and fill the JSON.`
         parsed = parseModelJsonObject(repairedText)
       }
 
-      return normalizeLeafDiseaseAnalysis(parsed, params.plantCommonName)
+      const normalized = normalizeLeafDiseaseAnalysis(parsed, params.plantCommonName)
+      return normalizeKnownLeafReport(normalized, params.plantCommonName, params.plantScientificName)
     } catch (error) {
       lastError = error
       const errorMsg = error instanceof Error ? error.message : String(error)
@@ -1441,4 +1498,3 @@ Analyze the image for disease or deficiency and fill the JSON.`
 
   throw lastError || new Error('All vision models failed for leaf analysis.')
 }
-

@@ -1,5 +1,6 @@
 import type { FarmerProfile } from '../store/useAuthStore'
 import { generateAiText } from './gemini/geminiClient'
+import { detectSpeechLanguage } from '../utils/speechLanguage'
 
 type ChatTurn = { role: 'user' | 'model'; content: string }
 
@@ -45,19 +46,32 @@ const getSarpanchFallback = (language: string) => {
   return replies[language] || '1. The network is slow.\n2. Send one short question again.\n3. Focus on one farm action for today.'
 }
 
+const getLanguageMatchedFallback = (language: string, isMixed: boolean) => {
+  if (isMixed) {
+    return '1. Network slow hai, please ek short sawaal dobara bhejiye.\n2. Main same mixed language me jawab dunga.\n3. Aaj ka kaam: signal check karke question repeat kijiye.'
+  }
+
+  return getSarpanchFallback(language)
+}
+
 export async function askSarpanchSalah(params: {
   question: string
   language: string
   farmer?: Partial<FarmerAIContext> | null
   history?: ChatTurn[]
 }) {
+  const languageProfile = detectSpeechLanguage(params.question, params.language)
   const systemPrompt = `You are Sarpanch Salah, a trusted farming expert for Indian farmers.
-Reply in simple ${getLanguageLabel(params.language)} or the regional language used by the farmer.
+The app language is ${getLanguageLabel(params.language)}, but the farmer's latest message decides the reply language.
+Detected latest message language: ${languageProfile.label}${languageProfile.isMixed ? ' mixed with English' : ''}.
+Language rule: ${languageProfile.instruction}
 Rules:
 - Keep every answer under 5 short lines.
 - Be practical and step-based when useful.
 - Prefer cost-aware, low-risk advice.
 - If information is missing, ask only one short question.
+- Match the farmer's script and style. Hindi voice should get Hindi, English should get English, Kannada should get Kannada, and mixed input should get the same natural mix.
+- Use clear speakable sentences. Avoid symbols, markdown, tables, long lists, and heavy punctuation because the answer will be read aloud.
 - Plain text only. No markdown. No long explanations.`
 
   const userMessage = `Farmer context:
@@ -71,11 +85,11 @@ ${params.question}`
       systemPrompt,
       userMessage,
       history: params.history,
-      model: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'],
+      model: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'],
     })
   } catch (error) {
     console.warn('[AI] Sarpanch Salah fallback', error)
-    return getSarpanchFallback(params.language)
+    return getLanguageMatchedFallback(languageProfile.language, languageProfile.isMixed)
   }
 }
 
@@ -124,7 +138,7 @@ K: ${params.npk?.k || 'Not provided'}`
     return await generateAiText({
       systemPrompt,
       userMessage,
-      model: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'],
+      model: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'],
     })
   } catch (error) {
     console.warn('[AI] Soil analysis fallback', error)
@@ -158,7 +172,7 @@ You must:
     return await generateAiText({
       systemPrompt,
       userMessage: params.contractText,
-      model: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'],
+      model: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'],
     })
   } catch (error) {
     console.warn('[AI] Contract analysis fallback', error)

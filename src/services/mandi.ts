@@ -91,12 +91,14 @@ const summarize = (crop: string, prices: MarketPrice[], location?: MandiLocation
   }
 }
 
-export async function getMandiPrice(crop: string, location?: MandiLocation): Promise<MandiPriceSummary> {
+export async function getMandiPrice(crop: string, location?: MandiLocation, forceRefresh?: boolean): Promise<MandiPriceSummary> {
   const cacheKey = buildCacheKey(crop, location)
-  const cached = await get<{ value: MandiPriceSummary; expiresAt: number }>(cacheKey)
-
-  if (cached && cached.expiresAt > Date.now()) {
-    return cached.value
+  
+  if (!forceRefresh) {
+    const cached = await get<{ value: MandiPriceSummary; expiresAt: number }>(cacheKey)
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.value
+    }
   }
 
   // Fetch with state filter for geographically coherent results

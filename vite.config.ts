@@ -9,15 +9,8 @@ export default defineConfig({
       '/plantnet-api': {
         target: 'https://my-api.plantnet.org',
         changeOrigin: true,
-        secure: true,
+        secure: false,
         rewrite: path => path.replace(/^\/plantnet-api/, ''),
-        configure: proxy => {
-          proxy.on('proxyReq', proxyReq => {
-            // PlantNet rejects localhost/browser origins; send this as a server-side request instead.
-            proxyReq.removeHeader('origin')
-            proxyReq.removeHeader('referer')
-          })
-        },
       },
     },
   },

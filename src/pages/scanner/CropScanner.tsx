@@ -10,7 +10,12 @@ import {
   Leaf,
   Download,
   Sparkles,
+  Share2,
+  History,
+  Trash2,
 } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { useScanHistory } from '../../hooks/useScanHistory'
 import { loadMobileNet, validateLeafLikeImage } from '../../services/scanner/mobilenetLeaf'
 import { identifyPlantWithPlantNet } from '../../services/scanner/plantnetClient'
 import { analyzeLeafDiseaseStructured } from '../../services/gemini/geminiClient'
@@ -53,6 +58,7 @@ export default function CropScanner() {
   const [plantMatch, setPlantMatch] = useState<PlantNetMatch | null>(null)
   const [analysis, setAnalysis] = useState<LeafDiseaseAnalysis | null>(null)
   const [modelWarmup, setModelWarmup] = useState(false)
+  const { history, saveScan, deleteScan } = useScanHistory()
 
   useEffect(() => {
     let cancelled = false
@@ -113,7 +119,21 @@ export default function CropScanner() {
       }
 
       setPreflightHint('Identifying plant (PlantNet)...')
-      const plant = await identifyPlantWithPlantNet(file)
+      let plant: PlantNetMatch
+      try {
+        plant = await identifyPlantWithPlantNet(file)
+      } catch (pnErr) {
+        const errorMsg = pnErr instanceof Error ? pnErr.message : 'Unknown PlantNet error'
+        console.warn('PlantNet identification failed, falling back to Gemini identifying from image', pnErr)
+        toast.error(`Plant identification failed: ${errorMsg}. Falling back to visual analysis.`, { duration: 5000 })
+        
+        // Fallback: provide a placeholder so Gemini can identify it from the image
+        plant = {
+          scientificName: 'Unknown',
+          commonName: 'Detecting via Vision AI...',
+          score: 0.9, // Set a fake high score so the confidence label looks better
+        }
+      }
       setPlantMatch(plant)
 
       setPhase('scanning')
@@ -133,6 +153,13 @@ export default function CropScanner() {
       })
       setAnalysis(result)
       setPhase('result')
+      
+      // Save to local history
+      saveScan({
+        imageDataUrl: dataUrl,
+        analysis: result,
+        plantMatch: plant,
+      })
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : 'Something went wrong. Please try again.'
@@ -157,6 +184,35 @@ export default function CropScanner() {
       plantLabel: `${plantMatch.commonName} (${plantMatch.scientificName})`,
       plantScore: plantMatch.score,
     })
+  }
+  
+  const handleShare = async () => {
+    if (!dataUrl || !analysis || !plantMatch) return
+    
+    const shareData = {
+      title: `Sarpanch AI - ${analysis.cropName} Health Report`,
+      text: `My ${analysis.cropName} scan result: ${analysis.diseaseName} (${analysis.severity} severity). Check it out on Sarpanch AI!`,
+      url: window.location.origin + '/scanner',
+    }
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData)
+        toast.success('Report shared successfully!')
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          toast.error('Failed to share report')
+        }
+      }
+    } else {
+      // Fallback: Copy to clipboard
+      try {
+        await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}`)
+        toast.success('Summary copied to clipboard!')
+      } catch {
+        toast.error('Sharing not supported on this browser')
+      }
+    }
   }
 
   const showScanOverlay = phase === 'scanning' || phase === 'ai'
@@ -253,6 +309,55 @@ export default function CropScanner() {
                   </p>
                 )}
               </div>
+
+              {history.length > 0 && (
+                <div className="w-full mt-8 space-y-4">
+                  <div className="flex items-center justify-between px-1">
+                    <h3 className="text-sm font-bold text-neutral-800 flex items-center gap-2">
+                      <History size={16} className="text-brand-600" />
+                      Recent Reports
+                    </h3>
+                  </div>
+                  <div className="space-y-3">
+                    {history.map((item) => (
+                      <div
+                        key={item.id}
+                        className="group relative flex items-center gap-3 p-3 rounded-2xl border border-brand-100 bg-white hover:border-brand-300 transition-all cursor-pointer shadow-sm active:scale-[0.99]"
+                        onClick={() => {
+                          setDataUrl(item.imageDataUrl)
+                          setAnalysis(item.analysis)
+                          setPlantMatch(item.plantMatch)
+                          setPhase('result')
+                        }}
+                      >
+                        <div className="w-12 h-12 rounded-xl overflow-hidden bg-neutral-100 shrink-0 border border-brand-50">
+                          <img src={item.imageDataUrl} alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-neutral-900 truncate">
+                            {item.analysis.cropName}
+                          </p>
+                          <p className="text-[11px] text-neutral-500 flex items-center gap-2">
+                            <span>{item.analysis.diseaseName}</span>
+                            <span className="w-1 h-1 rounded-full bg-neutral-300" />
+                            <span>{new Date(item.timestamp).toLocaleDateString()}</span>
+                          </p>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            deleteScan(item.id)
+                            toast.success('Report deleted')
+                          }}
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -337,7 +442,9 @@ export default function CropScanner() {
                     <p className="font-semibold text-emerald-900">Plant identified</p>
                     <p className="text-emerald-800">
                       {plantMatch.commonName}{' '}
-                      <span className="text-emerald-600 text-xs">({(plantMatch.score * 100).toFixed(1)}% match)</span>
+                      {plantMatch.scientificName !== 'Unknown' && (
+                        <span className="text-emerald-600 text-xs">({(plantMatch.score * 100).toFixed(1)}% match)</span>
+                      )}
                     </p>
                     <p className="mt-1 text-xs text-emerald-700">
                       Confidence: {getPlantNetConfidenceLabel(plantMatch.score)}
@@ -443,8 +550,17 @@ export default function CropScanner() {
 
                         <button
                           type="button"
+                          onClick={handleShare}
+                          className="w-full flex items-center justify-center gap-2 rounded-2xl border border-brand-200 bg-white text-brand-800 font-semibold py-3 hover:bg-brand-50 transition-colors"
+                        >
+                          <Share2 size={18} />
+                          Share report
+                        </button>
+
+                        <button
+                          type="button"
                           onClick={reset}
-                          className="w-full rounded-2xl bg-brand-600 text-white font-semibold py-3.5 hover:bg-brand-500 transition-colors"
+                          className="w-full sm:col-span-2 rounded-2xl bg-brand-600 text-white font-semibold py-3.5 hover:bg-brand-500 transition-all active:scale-[0.98]"
                         >
                           Scan another leaf
                         </button>

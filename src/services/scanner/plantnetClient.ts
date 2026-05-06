@@ -19,14 +19,41 @@ export async function identifyPlantWithPlantNet(file: File): Promise<PlantNetMat
   body.append('images', file)
   body.append('organs', 'leaf')
 
+  const maskedUrl = url.replace(apiKey, 'REDACTED')
+  console.log(`[PlantNet] Identifying with URL: ${maskedUrl}`)
+
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 15000) // 15s timeout
+
   const response = await fetch(url, {
     method: 'POST',
     body,
+    signal: controller.signal,
+  }).catch(err => {
+    clearTimeout(timeoutId)
+    console.error(`[PlantNet] Fetch error: ${err.message}`)
+    if (err.name === 'AbortError') {
+      throw new Error('PlantNet API request timed out. Please check your internet connection.')
+    }
+    throw new Error(`Failed to connect to PlantNet API: ${err.message}`)
   })
+  clearTimeout(timeoutId)
 
   if (!response.ok) {
     const text = await response.text().catch(() => '')
-    throw new Error(`PlantNet error (${response.status}): ${text.slice(0, 200)}`)
+    const status = response.status
+    console.error(`[PlantNet] Error ${status}: ${text}`)
+    let msg = `PlantNet API error (${status})`
+    
+    if (status === 502) {
+      msg = 'PlantNet service is currently unavailable through the local proxy. Please check your internet connection or try again later.'
+    } else if (status === 401 || status === 403) {
+      msg = 'PlantNet API key is invalid or unauthorized.'
+    } else if (text) {
+      msg += `: ${text.slice(0, 150)}`
+    }
+    
+    throw new Error(msg)
   }
 
   const data = (await response.json()) as {

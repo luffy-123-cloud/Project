@@ -19,7 +19,7 @@ const NO_FAB_PATHS = [
   '/farm-rental/service/',
 ]
 
-const NO_HEADER_PATHS = ['/splash', '/language', '/category', '/login', '/farm-rental/service/']
+const NO_HEADER_PATHS = ['/splash', '/language', '/category', '/login', '/farm-rental/service/', '/fields/live-market']
 const HIDE_NAV_PATHS = ['/farm-rental/service/']
 
 export default function AppShell() {

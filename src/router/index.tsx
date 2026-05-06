@@ -57,6 +57,10 @@ const SaudaSuraksha    = lazy(() => import('../pages/tools/SaudaSuraksha'))
 
 // === NEW PAGES ===
 const FieldManagement  = lazy(() => import('../pages/fields/FieldManagement'))
+const LiveMarketDashboard = lazy(() => import('../pages/fields/LiveMarketDashboard'))
+const MarketComparisonDashboard = lazy(() => import('../pages/fields/MarketComparisonDashboard'))
+const PriceTrendsDashboard = lazy(() => import('../pages/fields/PriceTrendsDashboard'))
+const MarketLocatorDashboard = lazy(() => import('../pages/fields/MarketLocatorDashboard'))
 const AddCrop          = lazy(() => import('../pages/fields/AddCrop'))
 const MyTasks          = lazy(() => import('../pages/fields/MyTasks'))
 const Marketplace      = lazy(() => import('../pages/market/Marketplace'))
@@ -106,6 +110,10 @@ const router = createBrowserRouter([
 
       // Fields
       { path: 'fields', element: <S><FieldManagement /></S> },
+      { path: 'fields/live-market', element: <S><LiveMarketDashboard /></S> },
+      { path: 'fields/comparison', element: <S><MarketComparisonDashboard /></S> },
+      { path: 'fields/trends', element: <S><PriceTrendsDashboard /></S> },
+      { path: 'fields/locator', element: <S><MarketLocatorDashboard /></S> },
 
       // Marketplace
       { path: 'marketplace',     element: <S><Marketplace /></S> },
