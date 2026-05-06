@@ -1,9 +1,12 @@
 // src/pages/fields/MarketLocatorDashboard.tsx
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet'
 import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
+import 'leaflet-routing-machine'
 import { 
   Search, 
   Bell, 
@@ -13,7 +16,8 @@ import {
   TrendingUp, 
   ChevronRight,
   Info,
-  Loader2
+  Loader2,
+  Navigation2
 } from 'lucide-react'
 
 // Fix Leaflet icon issue
@@ -45,12 +49,52 @@ function ChangeView({ center, zoom }: { center: [number, number], zoom: number }
   return null;
 }
 
+// Routing Machine Component
+function RoutingMachine({ userLoc, destLoc }: { userLoc: [number, number], destLoc: [number, number] }) {
+  const map = useMap()
+  const routingControlRef = useRef<any>(null)
+
+  useEffect(() => {
+    if (!map || !userLoc || !destLoc) return
+
+    if (routingControlRef.current) {
+      map.removeControl(routingControlRef.current)
+    }
+
+    routingControlRef.current = (L as any).Routing.control({
+      waypoints: [
+        L.latLng(userLoc[0], userLoc[1]),
+        L.latLng(destLoc[0], destLoc[1])
+      ],
+      routeWhileDragging: false,
+      addWaypoints: false,
+      draggableWaypoints: false,
+      fitSelectedRoutes: true,
+      show: false, // Hide text directions panel
+      lineOptions: {
+        styles: [{ color: '#4a7c59', weight: 6, opacity: 0.8 }]
+      },
+      createMarker: () => null // We'll use our own markers
+    }).addTo(map)
+
+    return () => {
+      if (routingControlRef.current) {
+        map.removeControl(routingControlRef.current)
+      }
+    }
+  }, [map, userLoc, destLoc])
+
+  return null
+}
+
 export default function MarketLocatorDashboard() {
   const [markets, setMarkets] = useState<MarketRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [center] = useState<[number, number]>([15.8, 74.75]) // Centered around Belgaum-Kittur-Dharwad
-  const [zoom] = useState(9)
+  const [center] = useState<[number, number]>([15.8, 74.75])
+  const [zoom] = useState(10)
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null)
+  const [selectedDestination, setSelectedDestination] = useState<[number, number] | null>(null)
 
   const mandiCoordinates: Record<string, { lat: number, lng: number }> = {
     'Belagavi': { lat: 15.8497, lng: 74.4977 },
@@ -66,11 +110,29 @@ export default function MarketLocatorDashboard() {
     'Saundatti': { lat: 15.7743, lng: 75.1147 },
   }
 
+  // Get user location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          })
+        },
+        () => {
+          console.warn("Location permission denied. Using default.")
+          setUserLocation({ lat: 15.8497, lng: 74.4977 }) 
+        },
+        { enableHighAccuracy: true }
+      )
+    }
+  }, [])
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
-        // Fetching records for Karnataka
         const API_URL = "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd000001d040eceaf01f49eb5bc553f6d3ec0284&format=json&filters[State]=Karnataka&limit=1000"
         
         const response = await axios.get(API_URL)
@@ -79,7 +141,6 @@ export default function MarketLocatorDashboard() {
           
           const processed = response.data.records.reduce((acc: MarketRecord[], curr: any) => {
             const isTarget = targetMarkets.some(tm => curr.market.includes(tm))
-            // Explicitly excluding Raichur
             const isRaichur = curr.market.includes('Raichur')
 
             if (isTarget && !isRaichur && !acc.find(m => m.market === curr.market)) {
@@ -132,8 +193,8 @@ export default function MarketLocatorDashboard() {
     fetchData()
   }, [])
 
-  const handleGetDirections = (lat: number, lng: number) => {
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank')
+  const handleRouteRequest = (lat: number, lng: number) => {
+    setSelectedDestination([lat, lng])
   }
 
   return (
@@ -174,7 +235,10 @@ export default function MarketLocatorDashboard() {
                 <h1 className="text-2xl font-bold text-[#2e3230]" style={{ fontFamily: 'Literata, serif' }}>Local Hubs</h1>
                 <p className="text-xs text-[#4a4e4a] font-bold uppercase tracking-widest">Belgaum & Surroundings</p>
               </div>
-              <button className="text-[#4a7c59] hover:bg-[#c8e8d0] p-3 rounded-xl transition-all shadow-sm bg-white border border-[#c4c8bc]/20">
+              <button 
+                onClick={() => setSelectedDestination(null)}
+                className="text-[#4a7c59] hover:bg-[#c8e8d0] p-3 rounded-xl transition-all shadow-sm bg-white border border-[#c4c8bc]/20"
+              >
                 <Navigation size={20} />
               </button>
             </div>
@@ -193,7 +257,7 @@ export default function MarketLocatorDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                     key={i} 
-                    className="bg-white p-6 rounded-2xl border-2 border-transparent hover:border-[#4a7c59]/50 shadow-sm hover:shadow-xl transition-all group cursor-pointer"
+                    className={`bg-white p-6 rounded-2xl border-2 ${selectedDestination && selectedDestination[0] === market.lat && selectedDestination[1] === market.lng ? 'border-[#4a7c59]' : 'border-transparent'} hover:border-[#4a7c59]/50 shadow-sm hover:shadow-xl transition-all group cursor-pointer`}
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div className="space-y-1">
@@ -213,10 +277,10 @@ export default function MarketLocatorDashboard() {
                         <p className="text-lg font-black text-[#4a7c59]">₹{market.modal_price}</p>
                       </div>
                       <button 
-                        onClick={() => handleGetDirections(market.lat!, market.lng!)}
-                        className="p-3 bg-white rounded-full border border-[#c4c8bc]/20 text-[#4a7c59] hover:bg-[#4a7c59] hover:text-white transition-all shadow-sm"
+                        onClick={() => market.lat && market.lng && handleRouteRequest(market.lat, market.lng)}
+                        className={`p-3 rounded-full border border-[#c4c8bc]/20 ${selectedDestination && selectedDestination[0] === market.lat && selectedDestination[1] === market.lng ? 'bg-[#4a7c59] text-white' : 'bg-white text-[#4a7c59]'} hover:bg-[#4a7c59] hover:text-white transition-all shadow-sm flex items-center gap-2`}
                       >
-                        <Navigation size={18} />
+                        <Navigation2 size={18} fill="currentColor" />
                       </button>
                     </div>
                   </motion.div>
@@ -240,18 +304,23 @@ export default function MarketLocatorDashboard() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             
-            {/* Single Large Coverage Circle centered between Belgaum and Dharwad */}
-            <Circle 
-              center={[15.65, 74.8]}
-              radius={80000} // 80km - large enough to cover Raibag (North) to Haliyal (South)
-              pathOptions={{ 
-                fillColor: '#4a7c59', 
-                fillOpacity: 0.05, 
-                color: '#4a7c59', 
-                weight: 1,
-                dashArray: '10, 15'
-              }}
-            />
+            {userLocation && (
+              <Marker position={[userLocation.lat, userLocation.lng]}>
+                <Popup>Your Current Location</Popup>
+              </Marker>
+            )}
+
+            {userLocation && selectedDestination && (
+              <RoutingMachine 
+                userLoc={
+                  // Safety Guard: If user is too far (e.g. Europe), default source to Belagavi
+                  Math.abs(userLocation.lat - 15.8) > 2 || Math.abs(userLocation.lng - 74.7) > 2
+                  ? [15.8497, 74.4977] 
+                  : [userLocation.lat, userLocation.lng]
+                }
+                destLoc={selectedDestination}
+              />
+            )}
 
             {!loading && markets.map((m, i) => (
               <Marker key={i} position={[m.lat!, m.lng!]}>
@@ -260,10 +329,10 @@ export default function MarketLocatorDashboard() {
                     <h4 className="font-bold text-[#2e3230] text-base mb-1">{m.market}</h4>
                     <p className="text-xs text-[#4a4e4a] mb-2">{m.commodity}: <span className="font-bold text-[#4a7c59]">₹{m.modal_price}</span></p>
                     <button 
-                      onClick={() => handleGetDirections(m.lat!, m.lng!)}
+                      onClick={() => handleRouteRequest(m.lat!, m.lng!)}
                       className="w-full bg-[#4a7c59] text-white py-1.5 rounded-lg text-xs font-bold"
                     >
-                      Navigate
+                      Show Route
                     </button>
                   </div>
                 </Popup>
@@ -279,11 +348,13 @@ export default function MarketLocatorDashboard() {
               className="bg-white/90 backdrop-blur-xl p-6 rounded-3xl shadow-2xl max-w-xl mx-auto border border-white/50 flex items-center gap-6 pointer-events-auto ring-1 ring-black/5"
             >
               <div className="bg-[#c8e8d0] p-4 rounded-2xl text-[#4a7c59]">
-                <TrendingUp size={32} />
+                <Navigation size={32} />
               </div>
               <div className="flex-1">
-                <p className="text-[10px] font-black text-[#4a4e4a] uppercase tracking-widest mb-1">Local Focus</p>
-                <p className="text-base font-bold text-[#2e3230]">Coverage circle now optimized for Kittur, Raibag, Khanapur, and Haliyal.</p>
+                <p className="text-[10px] font-black text-[#4a4e4a] uppercase tracking-widest mb-1">Live Routing</p>
+                <p className="text-base font-bold text-[#2e3230]">
+                  {selectedDestination ? "Calculating optimal route to Mandi..." : "Select a market to see the route from your location."}
+                </p>
               </div>
             </motion.div>
           </div>
@@ -304,6 +375,9 @@ export default function MarketLocatorDashboard() {
         .custom-popup .leaflet-popup-content-wrapper {
           border-radius: 16px;
           padding: 4px;
+        }
+        .leaflet-routing-container {
+          display: none !important;
         }
       `}</style>
     </div>
