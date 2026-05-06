@@ -163,5 +163,23 @@
     "ureaFertilizer": "Urea Fertilizer",
     "northFields": "North Fields",
     "southFields": "South Fields"
+  },
+  "tools": {
+    "title": "Agricultural Decision Tools",
+    "fasalSalah": { "title": "Fasal Salah", "desc": "Personalized crop recommendations based on soil." },
+    "mandiSaathi": { "title": "Mandi Saathi", "desc": "Real-time market rates for wheat, rice, & pulses." },
+    "mittiSehat": { "title": "Mitti Sehat", "desc": "Soil health card analysis and fertilizer tips." },
+    "khetiKharcha": { "title": "Kheti Kharcha", "desc": "Expense tracking and seasonal profit estimates." },
+    "saudaSuraksha": { "title": "Sauda Suraksha", "desc": "Secure contract farming agreements & insurance." },
+    "kisanKaksha": { "title": "Kisan Kaksha", "desc": "Video lessons on modern farming techniques." },
+    "fasalDoctor": { "title": "Fasal Doctor", "desc": "AI-powered pest identification from photos." },
+    "sarpanchSalah": { "title": "Sarpanch Salah", "desc": "Direct channel for local administrative support." },
+    "sarkariYojana": { "title": "Sarkari Yojana", "desc": "One-stop shop for all central & state schemes." }
+  },
+  "market": {
+    "spotlight": "Mandi Spotlight",
+    "wheat": "Wheat (Gehu)",
+    "rice": "Basmati Rice",
+    "mustard": "Mustard (Sarson)"
   }
 }

@@ -1,6 +1,5 @@
 // src/pages/fields/MarketComparisonDashboard.tsx
 import { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
 import axios from 'axios'
 import jsPDF from 'jspdf'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
@@ -9,7 +8,6 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import 'leaflet-routing-machine'
 import { 
-  Search, 
   Bell as LucideBell, 
   User as LucideUser, 
   Filter as LucideFilter, 
@@ -17,11 +15,9 @@ import {
   MapPin, 
   Store, 
   Truck, 
-  ArrowRight, 
   Info,
   TrendingUp,
   TrendingDown,
-  Minus,
   Lightbulb,
   Loader2,
   Navigation

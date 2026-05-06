@@ -7,16 +7,11 @@ import {
   Search, 
   Bell, 
   TrendingUp, 
-  TrendingDown, 
   Leaf, 
   Sprout, 
-  Apple, 
   Wheat, 
   Info, 
-  BarChart3, 
   Filter, 
-  ArrowUpDown,
-  Circle,
   Loader2
 } from 'lucide-react'
 
@@ -369,12 +364,4 @@ export default function LiveMarketDashboard() {
   )
 }
 
-function GrainIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#4a7c59]">
-      <path d="M12 2L15 5L12 8L9 5L12 2Z" fill="currentColor" />
-      <path d="M12 10L15 13L12 16L9 13L12 10Z" fill="currentColor" />
-      <path d="M12 18L15 21L12 24L9 21L12 18Z" fill="currentColor" />
-    </svg>
-  )
-}
+

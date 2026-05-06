@@ -30,57 +30,57 @@ import { GOVERNMENT_FARMER_PORTAL_URL, isExternalUrl, openExternalUrl } from '..
 const FEATURE_MENU_ITEMS = [
   {
     id: 'mandi-saathi',
-    title: 'Mandi Saathi',
-    description: 'Check mandi rates and list produce with reference pricing.',
+    titleKey: 'tools.mandiSaathi.title',
+    descriptionKey: 'tools.mandiSaathi.desc',
     route: '/marketplace',
     icon: Search,
   },
   {
     id: 'crop-advisory',
-    title: 'Fasal Salah',
-    description: 'Get crop recommendations from your land, water, and weather context.',
+    titleKey: 'tools.fasalSalah.title',
+    descriptionKey: 'tools.fasalSalah.desc',
     route: '/crop-advisory',
     icon: Leaf,
   },
   {
     id: 'mitti-sehat',
-    title: 'Mitti Sehat',
-    description: 'Get short fertilizer suggestions from soil inputs.',
+    titleKey: 'tools.mittiSehat.title',
+    descriptionKey: 'tools.mittiSehat.desc',
     route: '/mitti-sehat',
     icon: Sprout,
   },
   {
     id: 'kheti-kharcha',
-    title: 'Kheti Kharcha',
-    description: 'Estimate cost, revenue, and expected profit.',
+    titleKey: 'tools.khetiKharcha.title',
+    descriptionKey: 'tools.khetiKharcha.desc',
     route: '/kheti-kharcha',
     icon: Calculator,
   },
   {
     id: 'sauda-suraksha',
-    title: 'Sauda Suraksha',
-    description: 'Review risky contract clauses before signing.',
+    titleKey: 'tools.saudaSuraksha.title',
+    descriptionKey: 'tools.saudaSuraksha.desc',
     route: '/sauda-suraksha',
     icon: ShieldCheck,
   },
   {
     id: 'sarkari-yojana',
-    title: 'Sarkari Yojana',
-    description: 'Filter schemes and check eligibility quickly.',
+    titleKey: 'tools.sarkariYojana.title',
+    descriptionKey: 'tools.sarkariYojana.desc',
     route: GOVERNMENT_FARMER_PORTAL_URL,
     icon: Landmark,
   },
   {
     id: 'kisan-kaksha',
-    title: 'Kisan Kaksha',
-    description: 'Join farmer discussions and open curated learning resources.',
+    titleKey: 'tools.kisanKaksha.title',
+    descriptionKey: 'tools.kisanKaksha.desc',
     route: '/kisan-kaksha',
     icon: MessageSquareText,
   },
   {
     id: 'sarpanch-salah',
-    title: 'Sarpanch Salah',
-    description: 'Voice-first local-language farm guidance.',
+    titleKey: 'tools.sarpanchSalah.title',
+    descriptionKey: 'tools.sarpanchSalah.desc',
     route: '/sarpanch-salah',
     icon: Mic,
   },
@@ -201,15 +201,25 @@ export default function GlobalHeader() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              aria-label={t('common.searchMarketplace')}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-800 transition-all hover:bg-neutral-100 active:scale-95"
-              onClick={() => navigate('/marketplace')}
-            >
-              <Search size={19} strokeWidth={2} />
-            </button>
+          <div className="flex items-center gap-1.5">
+            {/* Language Scroll Selector */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-[120px] sm:max-w-[200px] md:max-w-[300px] px-1.5 py-1 bg-[#f0ece4] rounded-full border border-[#c4c8bc]/30 mr-0.5 shadow-inner">
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => void setLanguage(lang)}
+                  disabled={isChangingLanguage}
+                  className={`px-3 py-1 rounded-full text-[10px] font-black whitespace-nowrap uppercase tracking-wider transition-all active:scale-95 ${
+                    language === lang 
+                      ? 'bg-[#2a6038] text-white shadow-sm' 
+                      : 'text-[#4a4e4a] hover:bg-white/60'
+                  } ${isChangingLanguage ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {LANGUAGE_META[lang].nativeName}
+                </button>
+              ))}
+            </div>
 
             <button
               type="button"
@@ -381,12 +391,12 @@ export default function GlobalHeader() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-3">
-                              <p className="text-sm font-bold text-neutral-900">{item.title}</p>
+                              <p className="text-sm font-bold text-neutral-900">{t(item.titleKey)}</p>
                               <span className="rounded-full bg-brand-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-brand-700">
                                 Open
                               </span>
                             </div>
-                            <p className="mt-1 text-xs leading-relaxed text-neutral-500">{item.description}</p>
+                            <p className="mt-1 text-xs leading-relaxed text-neutral-500">{t(item.descriptionKey)}</p>
                           </div>
                         </div>
                       </button>

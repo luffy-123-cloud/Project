@@ -1,8 +1,8 @@
 // src/pages/fields/MarketLocatorDashboard.tsx
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import axios from 'axios'
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup,  useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
@@ -13,8 +13,6 @@ import {
   User, 
   MapPin, 
   Navigation, 
-  TrendingUp, 
-  ChevronRight,
   Info,
   Loader2,
   Navigation2

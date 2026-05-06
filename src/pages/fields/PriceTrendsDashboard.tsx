@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
 import { 
-  TrendingUp, 
-  TrendingDown, 
+   
+   
   Download, 
   Search, 
   Bell, 
@@ -18,8 +18,8 @@ import {
   BellRing
 } from 'lucide-react'
 import { 
-  LineChart, 
-  Line, 
+   
+   
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -49,7 +49,6 @@ interface PriceRecord {
 export default function PriceTrendsDashboard() {
   const [records, setRecords] = useState<PriceRecord[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [activePeriod, setActivePeriod] = useState('Weekly')
   const [activeTab, setActiveTab] = useState('Line Analysis')
   const [isAlertActive, setIsAlertActive] = useState(false)
@@ -69,15 +68,15 @@ export default function PriceTrendsDashboard() {
             return dateB - dateA
           })
           setRecords(sorted)
-          setError(null)
+          
         } else {
           useFallbackData()
-          setError("Live Jowar trends for Belagavi currently unavailable. Showing historical market averages.")
+          
         }
       } catch (err) {
         console.error("Failed to fetch price trends:", err)
         useFallbackData()
-        setError("Unable to connect to market trend server. Showing estimated data.")
+        
       } finally {
         setLoading(false)
       }
@@ -136,7 +135,7 @@ export default function PriceTrendsDashboard() {
   const diffVal = parseInt(currentPrice) - parseInt(prevPrice)
   const priceDiff = ((diffVal / parseInt(prevPrice)) * 100).toFixed(1)
   
-  // Trend thresholds: >0.5% growth, <-0.5% decline, else stable
+  // Trend thresholds: >0.5% growth, <-0.5% dec else stable
   const trendStatus = parseFloat(priceDiff) > 0.5 ? 'growth' : parseFloat(priceDiff) < -0.5 ? 'decline' : 'stable'
   
   const theme = {
@@ -304,7 +303,7 @@ export default function PriceTrendsDashboard() {
                                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
                                 />
                                 <Bar dataKey="volume" radius={[6, 6, 0, 0]} animationDuration={1000}>
-                                  {chartData.map((entry, index) => (
+                                  {chartData.map((_, index) => (
                                     <Cell key={`cell-${index}`} fill={index === chartData.length - 1 ? theme.color : `${theme.color}44`} />
                                   ))}
                                 </Bar>
