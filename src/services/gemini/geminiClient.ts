@@ -42,12 +42,15 @@ interface GenerateOptions {
   model?: string | string[]
 }
 
-const DEFAULT_TEXT_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro']
-const SARPANCH_CHAT_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro']
+const DEFAULT_TEXT_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']
+const SARPANCH_CHAT_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro']
 const SARPANCH_TTS_MODELS = ['gemini-2.5-flash-preview-tts', 'gemini-2.5-pro-preview-tts']
 
 const TEXT_MODEL_TIMEOUT_MS: Record<string, number> = {
+  'gemini-2.5-flash-lite': 6000,
+  'gemini-2.0-flash-lite': 6000,
   'gemini-2.5-flash': 8000,
+  'gemini-2.0-flash': 7000,
   'gemini-2.5-pro': 9500,
 }
 
@@ -215,6 +218,8 @@ const getSarpanchChatFallback = (language: string): string => {
   return `${message}\nToday's Farm Action: Check mobile signal and ask one short question again.`
 }
 
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
+
 // ─── Core generator ────────────────────────────────────────────────────────
 async function generate(
   systemPrompt: string,
@@ -330,7 +335,16 @@ ${text}`
       return text
     } catch (error) {
       lastError = error
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      const isQuotaError = errorMsg.includes('429') || errorMsg.toLowerCase().includes('quota')
+
       console.warn(`[Gemini] ${modelName} failed`, error)
+
+      if (isQuotaError) {
+        // Wait 2 seconds before potentially trying another model (if any left in loop)
+        await delay(2000)
+        continue
+      }
     }
   }
 
@@ -565,7 +579,7 @@ Today's Weather: ${params.weather}
 Mandi Price Trend: ${params.mandiPriceTrend}
 Community Alerts: ${params.communityAlerts}`
 
-  return generate(system, user)
+  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -648,7 +662,7 @@ Current Price: ₹${params.currentPrice}/quintal
 7-Day Trend: ${params.priceTrend}
 Nearby Mandis: ${params.nearestMandis}`
 
-  return generate(system, user)
+  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -675,7 +689,7 @@ CRITICAL: Always recommend vet for EMERGENCY. Never diagnose rabies without vet.
 Age: ${params.age}
 Symptoms: ${params.symptoms}`
 
-  return generate(system, user)
+  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -708,7 +722,7 @@ pH: ${params.ph}
 Ammonia: ${params.ammonia_mgL} mg/L
 Temperature: ${params.temperature_C}°C`
 
-  return generate(system, user)
+  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -743,7 +757,7 @@ Location: ${params.location}
 Current Weather: ${params.currentWeather}
 Forecast: ${params.forecast}`
 
-  return generate(system, user)
+  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
 }
 
 export async function generateCropAdvisory(params: {
@@ -841,7 +855,7 @@ Weather: ${params.weatherData}
 Community Reports: ${params.communityReports}
 Scheme Deadlines: ${params.schemeDeadlines}`
 
-  return generate(system, user)
+  return generate(system, user, { model: ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'] })
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1379,34 +1393,52 @@ Analyze the image for disease or deficiency and fill the JSON.`
   const base64Data = params.base64Image.split(',')[1] || params.base64Image
   const mimeType = params.base64Image.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/)?.[1] || 'image/jpeg'
 
-  const model = client.getGenerativeModel({
-    model: 'gemini-2.5-flash',
-    systemInstruction,
-    generationConfig: {
-      maxOutputTokens: 1200,
-      temperature: 0.35,
-      topP: 0.9,
-      responseMimeType: 'application/json',
-    },
-  })
+  const candidateModels = ['gemini-2.5-flash-lite', 'gemini-2.0-flash-lite', 'gemini-2.5-flash']
+  let lastError: unknown = null
 
-  const parts: Part[] = [
-    { text: userMsg },
-    { inlineData: { data: base64Data, mimeType } },
-  ]
+  for (const modelName of candidateModels) {
+    try {
+      const model = client.getGenerativeModel({
+        model: modelName,
+        systemInstruction,
+        generationConfig: {
+          maxOutputTokens: 1200,
+          temperature: 0.35,
+          topP: 0.9,
+          responseMimeType: 'application/json',
+        },
+      })
 
-  const result = await withTimeout(model.generateContent(parts), 25_000, 'leaf-disease-json')
-  const rawText = extractResponseText(result)
-  let parsed: unknown
+      const parts: Part[] = [
+        { text: userMsg },
+        { inlineData: { data: base64Data, mimeType } },
+      ]
 
-  try {
-    parsed = parseModelJsonObject(rawText)
-  } catch (error) {
-    console.warn('[Leaf Scanner] Invalid JSON from Gemini, attempting repair', error)
-    const repairedText = await repairStructuredJsonWithGemini(client, rawText, jsonSchemaDescription)
-    parsed = parseModelJsonObject(repairedText)
+      const result = await withTimeout(model.generateContent(parts), 25_000, `leaf-json-${modelName}`)
+      const rawText = extractResponseText(result)
+      let parsed: unknown
+
+      try {
+        parsed = parseModelJsonObject(rawText)
+      } catch (error) {
+        console.warn(`[Leaf Scanner] Invalid JSON from ${modelName}, attempting repair`, error)
+        const repairedText = await repairStructuredJsonWithGemini(client, rawText, jsonSchemaDescription)
+        parsed = parseModelJsonObject(repairedText)
+      }
+
+      return normalizeLeafDiseaseAnalysis(parsed, params.plantCommonName)
+    } catch (error) {
+      lastError = error
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      console.warn(`[Leaf Scanner] ${modelName} failed`, error)
+      
+      if (errorMsg.includes('429') || errorMsg.toLowerCase().includes('quota')) {
+        await delay(2000)
+        continue
+      }
+    }
   }
 
-  return normalizeLeafDiseaseAnalysis(parsed, params.plantCommonName)
+  throw lastError || new Error('All vision models failed for leaf analysis.')
 }
 

@@ -71,7 +71,7 @@ ${params.question}`
       systemPrompt,
       userMessage,
       history: params.history,
-      model: ['gemini-2.5-flash', 'gemini-2.5-pro'],
+      model: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'],
     })
   } catch (error) {
     console.warn('[AI] Sarpanch Salah fallback', error)
@@ -124,7 +124,7 @@ K: ${params.npk?.k || 'Not provided'}`
     return await generateAiText({
       systemPrompt,
       userMessage,
-      model: ['gemini-2.5-flash', 'gemini-2.5-pro'],
+      model: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'],
     })
   } catch (error) {
     console.warn('[AI] Soil analysis fallback', error)
@@ -158,7 +158,7 @@ You must:
     return await generateAiText({
       systemPrompt,
       userMessage: params.contractText,
-      model: ['gemini-2.5-flash', 'gemini-2.5-pro'],
+      model: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'],
     })
   } catch (error) {
     console.warn('[AI] Contract analysis fallback', error)
