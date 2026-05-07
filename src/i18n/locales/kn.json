@@ -1,6 +1,6 @@
-﻿{
+{
   "app": { "name": "Sarpanch AI", "tagline": "Your Smart Farming Companion" },
-  "nav": { "home": "Home", "market": "Market", "weather": "Weather", "alerts": "Alerts", "profile": "Profile" },
+  "nav": { "home": "Home", "info": "Info", "weather": "Weather", "alerts": "Alerts", "profile": "Profile", "fields": "Fields", "rental": "Rental" },
   "onboarding": {
     "selectLanguage": "Choose Your Language",
     "selectCategory": "What Do You Farm?",
@@ -75,6 +75,15 @@
     "schemes": "Fishery Schemes"
   },
   "priority": { "high": "Urgent", "medium": "Today", "low": "This Week" },
-  "actions": { "refresh": "Refresh", "viewAll": "View All", "back": "Back", "next": "Next", "done": "Done", "skip": "Skip", "save": "Save" }
+  "actions": { "refresh": "Refresh", "viewAll": "View All", "back": "Back", "next": "Next", "done": "Done", "skip": "Skip", "save": "Save" },
+  "info": {
+    "title": "ಮಾಹಿತಿ ಕೇಂದ್ರ",
+    "desiNews": "ದೇಸಿ ಸುದ್ದಿ",
+    "desiNewsDesc": "ನಿಮ್ಮ ಪ್ರದೇಶದ ಕೃಷಿ ಸುದ್ದಿಗಳು.",
+    "globalImpact": "ಜಾಗತಿಕ ಪ್ರಭಾವ",
+    "globalImpactDesc": "ಭಾರತೀಯ ರೈತರ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುವ ಅಂತರರಾಷ್ಟ್ರೀಯ ಪ್ರವೃತ್ತಿಗಳು.",
+    "mandiSathi": "ಮಂಡಿ ಸಾಥಿ",
+    "mandiSathiDesc": "ಲೈವ್ ಮಂಡಿ ಬೆಲೆಗಳು ಮತ್ತು ಪಾರದರ್ಶಕ ಲಿಸ್ಟಿಂಗ್."
+  }
 }
 

@@ -105,7 +105,7 @@
   "nav": {
     "home": "Home",
     "fields": "Fields",
-    "market": "Market",
+    "info": "Info",
     "rental": "Rental",
     "scanCropDisease": "Scan Crop Disease"
   },
@@ -181,5 +181,14 @@
     "wheat": "Wheat (Gehu)",
     "rice": "Basmati Rice",
     "mustard": "Mustard (Sarson)"
+  },
+  "info": {
+    "title": "Info Hub",
+    "desiNews": "Desi News",
+    "desiNewsDesc": "Hyperlocal agricultural updates from your region.",
+    "globalImpact": "Global Impact",
+    "globalImpactDesc": "International trends affecting Indian farmers.",
+    "mandiSathi": "Mandi Saathi",
+    "mandiSathiDesc": "Live prices and transparent listings."
   }
 }

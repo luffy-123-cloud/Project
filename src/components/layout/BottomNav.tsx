@@ -1,12 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Home, Mountain, ShoppingCart, ScanLine, Tractor } from 'lucide-react'
+import { Home, Mountain, Info, ScanLine, Tractor } from 'lucide-react'
 import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 
 const NAV_ITEMS = [
   { key: 'nav.home', icon: Home, path: '/', exact: true },
   { key: 'nav.fields', icon: Mountain, path: '/fields', exact: false },
-  { key: 'nav.market', icon: ShoppingCart, path: '/marketplace', exact: false },
+  { key: 'nav.info', icon: Info, path: '/info', exact: false },
   { key: 'nav.rental', icon: Tractor, path: '/farm-rental', exact: false },
 ] as const
 

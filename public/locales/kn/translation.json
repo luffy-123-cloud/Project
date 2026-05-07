@@ -6,5 +6,21 @@
   "menu": { "label": "Menu", "title": "Feature Hub", "subtitle": "Account shortcuts and the running list for upcoming features.", "account": "Account", "preferences": "Preferences", "futureFeatures": "Future Features", "featureSlots_one": "{{count}} slot ready", "featureSlots_other": "{{count}} slots ready", "languageSelectorTitle": "Choose Language", "languageSelectorSubtitle": "Switch instantly without reloading the page.", "openProfile": "Open Profile", "openProfileDescription": "Edit your personal and farm details.", "openSettings": "Open Settings", "openSettingsDescription": "View language, category, and app preferences.", "language": "Language", "languageDescription": "Choose how the app speaks to you.", "signIn": "Sign In", "signInDescription": "Create an account or continue your saved setup.", "signOut": "Sign Out", "signOutDescription": "Log out safely from the current session.", "accountHint": "Profile available from top-right avatar" },
   "language": { "selectTitle": "Select Language", "selectSubtitle": "Choose your preferred language", "continue": "Continue", "browserDetected": "Detected for this device: {{language}}", "modalCurrent": "Current language", "modalAllLanguages": "All languages", "savedToAccount": "Signed-in changes are saved to your Firebase profile." },
   "settings": { "title": "Profile", "signedInWith": "Signed in with {{provider}}", "farmSettings": "Farm Settings", "preferences": "Preferences", "data": "Data", "editFarmProfile": "Edit Farm Profile", "editFarmProfileValue": "Set up profile", "farmingCategory": "Farming Category", "notSet": "Not set", "pushNotifications": "Push Notifications", "pushNotificationsValue": "Enabled for weather and prices", "network": "Network", "networkOnline": "Online, data syncing", "networkOffline": "Offline, using cached data", "pendingSync": "Pending Sync", "pendingSyncCount_one": "{{count}} record waiting to sync", "pendingSyncCount_other": "{{count}} records waiting to sync", "allSynced": "All data synced", "version": "Sarpanch AI v1.0.0 · Built for Indian Farmers", "signInCta": "Sign In / Create Account" },
-  "home": { "hello": "Hello", "todayLabel": "{{date}}", "aiInsights": "AI Insights", "insightsStatus": "{{live}} · {{auto}}", "todayTasks": "Today's Tasks", "viewAll": "View All", "tasksCount_one": "{{formattedCount}} task today", "tasksCount_other": "{{formattedCount}} tasks today" }
+  "home": { "hello": "Hello", "todayLabel": "{{date}}", "aiInsights": "AI Insights", "insightsStatus": "{{live}} · {{auto}}", "todayTasks": "Today's Tasks", "viewAll": "View All", "tasksCount_one": "{{formattedCount}} task today", "tasksCount_other": "{{formattedCount}} tasks today" },
+  "nav": {
+    "home": "Home",
+    "fields": "Fields",
+    "info": "ಮಾಹಿತಿ",
+    "rental": "Rental",
+    "scanCropDisease": "Scan Crop Disease"
+  },
+  "info": {
+    "title": "ಮಾಹಿತಿ ಕೇಂದ್ರ",
+    "desiNews": "ದೇಸಿ ಸುದ್ದಿ",
+    "desiNewsDesc": "ನಿಮ್ಮ ಪ್ರದೇಶದ ಕೃಷಿ ಸುದ್ದಿಗಳು.",
+    "globalImpact": "ಜಾಗತಿಕ ಪ್ರಭಾವ",
+    "globalImpactDesc": "ಭಾರತೀಯ ರೈತರ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುವ ಅಂತರರಾಷ್ಟ್ರಿಯ ಪ್ರವೃತ್ತಿಗಳು.",
+    "mandiSathi": "ಮಂಡಿ ಸಾಥಿ",
+    "mandiSathiDesc": "ಲೈವ್ ಮಂಡಿ ಬೆಲೆಗಳು ಮತ್ತು ಪಾರದರ್ಶಕ ಲಿಸ್ಟಿಂಗ್."
+  }
 }

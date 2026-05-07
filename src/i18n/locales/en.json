@@ -1,6 +1,6 @@
 {
   "app": { "name": "Sarpanch AI", "tagline": "Your Smart Farming Companion" },
-  "nav": { "home": "Home", "market": "Market", "weather": "Weather", "alerts": "Alerts", "profile": "Profile" },
+  "nav": { "home": "Home", "info": "Info", "weather": "Weather", "alerts": "Alerts", "profile": "Profile", "fields": "Fields", "rental": "Rental" },
   "onboarding": {
     "selectLanguage": "Choose Your Language",
     "selectCategory": "What Do You Farm?",
@@ -75,5 +75,14 @@
     "schemes": "Fishery Schemes"
   },
   "priority": { "high": "Urgent", "medium": "Today", "low": "This Week" },
-  "actions": { "refresh": "Refresh", "viewAll": "View All", "back": "Back", "next": "Next", "done": "Done", "skip": "Skip", "save": "Save" }
+  "actions": { "refresh": "Refresh", "viewAll": "View All", "back": "Back", "next": "Next", "done": "Done", "skip": "Skip", "save": "Save" },
+  "info": {
+    "title": "Info Hub",
+    "desiNews": "Desi News",
+    "desiNewsDesc": "Hyperlocal agricultural updates from your region.",
+    "globalImpact": "Global Impact",
+    "globalImpactDesc": "International trends affecting Indian farmers.",
+    "mandiSathi": "Mandi Saathi",
+    "mandiSathiDesc": "Live prices and transparent listings."
+  }
 }

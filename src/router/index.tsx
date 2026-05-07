@@ -68,6 +68,8 @@ const CropScanner      = lazy(() => import('../pages/scanner/CropScanner'))
 const FarmRentalHome   = lazy(() => import('../pages/farm-rental/FarmRentalHome'))
 const FarmRentalCategory = lazy(() => import('../pages/farm-rental/FarmRentalCategory'))
 const ServiceDetail      = lazy(() => import('../pages/farm-rental/ServiceDetail'))
+const InfoPage           = lazy(() => import('../pages/info/InfoPage'))
+const DesiNews           = lazy(() => import('../pages/info/DesiNews'))
 
 // ─── Loading fallback ──────────────────────────────────────────────────────────
 const PageLoader = () => (
@@ -117,6 +119,8 @@ const router = createBrowserRouter([
 
       // Marketplace
       { path: 'marketplace',     element: <S><Marketplace /></S> },
+      { path: 'info',            element: <S><InfoPage /></S> },
+      { path: 'info/desi-news',  element: <S><DesiNews /></S> },
       { path: 'crop-advisory',   element: <S><CropAdvisory /></S> },
       { path: 'mitti-sehat',     element: <S><SoilHealth /></S> },
       { path: 'kheti-kharcha',   element: <S><KhetiKharcha /></S> },
