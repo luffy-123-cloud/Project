@@ -27,8 +27,8 @@ interface LocationState {
 export const useLocationStore = create<LocationState>()(
   persist(
     (set) => ({
-      state: '',
-      district: '',
+      state: 'Karnataka',
+      district: 'Belagavi',
       village: '',
       coords: null,
       source: 'manual',

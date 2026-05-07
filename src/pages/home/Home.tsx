@@ -181,22 +181,21 @@ export default function Home() {
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
               {[
-                { icon: 'psychology', title: t('tools.fasalSalah.title'), desc: t('tools.fasalSalah.desc'), route: '/crop-advisory' },
-                { icon: 'trending_up', title: t('tools.mandiSaathi.title'), desc: t('tools.mandiSaathi.desc'), route: '/marketplace' },
-                { icon: 'grass', title: t('tools.mittiSehat.title'), desc: t('tools.mittiSehat.desc'), route: '/mitti-sehat' },
-                { icon: 'account_balance_wallet', title: t('tools.khetiKharcha.title'), desc: t('tools.khetiKharcha.desc'), route: '/kheti-kharcha' },
-                { icon: 'verified_user', title: t('tools.saudaSuraksha.title'), desc: t('tools.saudaSuraksha.desc'), route: '/sauda-suraksha' },
-                { icon: 'school', title: t('tools.kisanKaksha.title'), desc: t('tools.kisanKaksha.desc'), route: '/kisan-kaksha' },
-                { icon: 'medical_services', title: t('tools.fasalDoctor.title'), desc: t('tools.fasalDoctor.desc'), route: '/scanner' },
-                { icon: 'groups', title: t('tools.sarpanchSalah.title'), desc: t('tools.sarpanchSalah.desc'), route: '/sarpanch-salah' },
-                { icon: 'description', title: t('tools.sarkariYojana.title'), desc: t('tools.sarkariYojana.desc'), route: GOVERNMENT_FARMER_PORTAL_URL },
+                { icon: 'psychology', title: t('tools.fasalSalah.title'), desc: t('tools.fasalSalah.desc'), route: '/crop-advisory', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+                { icon: 'trending_up', title: t('tools.mandiSaathi.title'), desc: t('tools.mandiSaathi.desc'), route: '/marketplace', color: 'bg-orange-50 text-orange-700 border-orange-100' },
+                { icon: 'grass', title: t('tools.mittiSehat.title'), desc: t('tools.mittiSehat.desc'), route: '/mitti-sehat', color: 'bg-lime-50 text-lime-700 border-lime-100' },
+                { icon: 'account_balance_wallet', title: t('tools.khetiKharcha.title'), desc: t('tools.khetiKharcha.desc'), route: '/kheti-kharcha', color: 'bg-amber-50 text-amber-700 border-amber-100' },
+                { icon: 'verified_user', title: t('tools.saudaSuraksha.title'), desc: t('tools.saudaSuraksha.desc'), route: '/sauda-suraksha', color: 'bg-sky-50 text-sky-700 border-sky-100' },
+                { icon: 'school', title: t('tools.kisanKaksha.title'), desc: t('tools.kisanKaksha.desc'), route: '/kisan-kaksha', color: 'bg-indigo-50 text-indigo-700 border-indigo-100' },
+                { icon: 'groups', title: t('tools.sarpanchSalah.title'), desc: t('tools.sarpanchSalah.desc'), route: '/sarpanch-salah', color: 'bg-rose-50 text-rose-700 border-rose-100' },
+                { icon: 'description', title: t('tools.sarkariYojana.title'), desc: t('tools.sarkariYojana.desc'), route: GOVERNMENT_FARMER_PORTAL_URL, color: 'bg-yellow-50 text-yellow-700 border-yellow-100' },
               ].map((tool, idx) => (
-                <div key={idx} onClick={() => handleToolClick(tool.route)} className="bg-white p-6 rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border border-white/50 group shadow-sm">
-                  <div className="mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <span className="material-symbols-outlined text-[#2a6038] text-4xl">{tool.icon}</span>
+                <div key={idx} onClick={() => handleToolClick(tool.route)} className="bg-white p-6 rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border border-neutral-200/50 group shadow-sm flex flex-col items-center text-center">
+                  <div className={`mb-4 w-16 h-16 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${tool.color}`}>
+                    <span className="material-symbols-outlined text-3xl">{tool.icon}</span>
                   </div>
                   <h4 className="font-bold text-lg mb-2 text-[#2a6038] leading-tight">{tool.title}</h4>
-                  <p className="text-sm text-[#4a4e4a] leading-relaxed opacity-90">{tool.desc}</p>
+                  <p className="text-xs text-[#4a4e4a] leading-relaxed opacity-90">{tool.desc}</p>
                 </div>
               ))}
             </div>

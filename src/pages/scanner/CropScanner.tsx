@@ -123,9 +123,7 @@ export default function CropScanner() {
       try {
         plant = await identifyPlantWithPlantNet(file)
       } catch (pnErr) {
-        const errorMsg = pnErr instanceof Error ? pnErr.message : 'Unknown PlantNet error'
         console.warn('PlantNet identification failed, falling back to Gemini identifying from image', pnErr)
-        toast.error(`Plant identification failed: ${errorMsg}. Falling back to visual analysis.`, { duration: 5000 })
         
         // Fallback: provide a placeholder so Gemini can identify it from the image
         plant = {
