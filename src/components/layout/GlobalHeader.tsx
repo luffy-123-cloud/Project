@@ -99,6 +99,86 @@ export default function GlobalHeader() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false)
+  const [isLangExpanded, setIsLangExpanded] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      type: 'brand',
+      icon: Bell,
+      title: `Hey ${farmer?.name?.split(' ')[0] || 'User'}!`,
+      message: 'A new equipment (Tractor) has been added near your location.',
+      time: 'Just now',
+      colorClass: 'brand'
+    },
+    {
+      id: 2,
+      type: 'warning',
+      icon: Check,
+      title: 'Tasks Pending',
+      message: "Today's tasks are not complete. Please complete them to maintain your streak.",
+      time: '2 hours ago',
+      colorClass: 'orange'
+    },
+    {
+      id: 3,
+      type: 'success',
+      icon: Landmark,
+      title: 'Govt Scheme Update',
+      message: 'New PM-Kisan scheme guidelines have been released. Check your eligibility now.',
+      time: '5 hours ago',
+      colorClass: 'green'
+    },
+    {
+      id: 4,
+      type: 'success',
+      icon: Landmark,
+      title: 'Govt Scheme Deadline',
+      message: 'Fasal Bima Yojana application closes in 2 days. Apply soon.',
+      time: '1 day ago',
+      colorClass: 'green'
+    }
+  ])
+
+  const playNotificationSound = () => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const oscillator = audioCtx.createOscillator()
+      const gainNode = audioCtx.createGain()
+      
+      oscillator.connect(gainNode)
+      gainNode.connect(audioCtx.destination)
+      
+      oscillator.type = 'sine'
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime)
+      oscillator.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1)
+      
+      gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1)
+      
+      oscillator.start()
+      oscillator.stop(audioCtx.currentTime + 0.1)
+    } catch (e) {
+      console.error("Audio play failed", e)
+    }
+  }
+
+  const handleReadNotification = (id: number) => {
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }
+
+  const handleIgnoreNotification = (_id: number) => {
+    toast.success("Notification kept for later")
+  }
+
+  const toggleNotifications = () => {
+    const newState = !isNotificationsOpen
+    setIsNotificationsOpen(newState)
+    if (newState && notifications.length > 0) {
+      playNotificationSound()
+    }
+  }
 
   const initials = farmer?.name
     ?.trim()
@@ -202,33 +282,68 @@ export default function GlobalHeader() {
           </div>
 
           <div className="flex items-center gap-1.5">
-            {/* Language Scroll Selector */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-[120px] sm:max-w-[200px] md:max-w-[300px] px-1.5 py-1 bg-[#f0ece4] rounded-full border border-[#c4c8bc]/30 mr-0.5 shadow-inner">
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <button
-                  key={lang}
-                  type="button"
-                  onClick={() => void setLanguage(lang)}
-                  disabled={isChangingLanguage}
-                  className={`px-3 py-1 rounded-full text-[10px] font-black whitespace-nowrap uppercase tracking-wider transition-all active:scale-95 ${
-                    language === lang 
-                      ? 'bg-[#2a6038] text-white shadow-sm' 
-                      : 'text-[#4a4e4a] hover:bg-white/60'
-                  } ${isChangingLanguage ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {LANGUAGE_META[lang].nativeName}
-                </button>
-              ))}
+            {/* Dropdown Language Selector */}
+            <div className="relative flex items-center">
+              <button
+                type="button"
+                onClick={() => setIsLangExpanded(!isLangExpanded)}
+                className={`flex h-10 items-center justify-center gap-2 rounded-full px-4 transition-all active:scale-95 shadow-sm border ${
+                  isLangExpanded 
+                    ? 'bg-[#2a6038] text-white border-[#2a6038]' 
+                    : 'bg-[#f0ece4] text-[#2a6038] border-[#c4c8bc]/30'
+                }`}
+              >
+                <Globe size={18} />
+                <span className="text-[10px] font-black uppercase tracking-wider">
+                  {LANGUAGE_META[language].nativeName}
+                </span>
+                <ChevronRight size={14} className={`transition-transform duration-200 ${isLangExpanded ? 'rotate-90' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isLangExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden z-50"
+                  >
+                    <div className="max-h-[300px] overflow-y-auto py-2">
+                      {SUPPORTED_LANGUAGES.map((lang) => (
+                        <button
+                          key={lang}
+                          type="button"
+                          onClick={() => {
+                            void setLanguage(lang)
+                            setIsLangExpanded(false)
+                          }}
+                          disabled={isChangingLanguage}
+                          className={`w-full flex items-center justify-between px-4 py-3 text-sm transition-colors ${
+                            language === lang 
+                              ? 'bg-brand-50 text-brand-700 font-bold' 
+                              : 'text-neutral-700 hover:bg-neutral-50'
+                          } ${isChangingLanguage ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          <span>{LANGUAGE_META[lang].nativeName}</span>
+                          <span className="text-xs text-neutral-400">{LANGUAGE_META[lang].englishName}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <button
               type="button"
-              aria-label={t('common.openSettings')}
+              aria-label="Notifications"
               className="relative flex h-9 w-9 items-center justify-center rounded-full text-neutral-800 transition-all hover:bg-neutral-100 active:scale-95"
-              onClick={() => navigate('/settings')}
+              onClick={toggleNotifications}
             >
               <Bell size={19} strokeWidth={2} />
-              <span className="absolute right-2 top-2 h-2 w-2 rounded-full border-2 border-white bg-brand-500" />
+              {notifications.length > 0 && (
+                <span className="absolute right-2 top-2 h-2 w-2 rounded-full border-2 border-white bg-brand-500" />
+              )}
             </button>
 
             <button
@@ -243,7 +358,7 @@ export default function GlobalHeader() {
             <button
               type="button"
               aria-label={t('common.profile')}
-              onClick={() => navigate('/profile')}
+              onClick={() => navigate('/settings')}
               className="ml-1 h-10 w-10 overflow-hidden rounded-full border-2 border-neutral-50 shadow-sm transition-all active:scale-95"
             >
               {farmer?.photoURL ? (
@@ -487,6 +602,92 @@ export default function GlobalHeader() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Notifications Panel */}
+      <AnimatePresence>
+        {isNotificationsOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsNotificationsOpen(false)}
+              className="fixed inset-0 z-50 bg-neutral-900/40 backdrop-blur-sm"
+            />
+            <motion.aside
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-white shadow-2xl"
+              style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+            >
+              <div className="flex h-16 shrink-0 items-center justify-between border-b border-neutral-100 px-6">
+                <h2 className="text-lg font-bold text-neutral-900" style={{ fontFamily: 'Baloo 2, sans-serif' }}>
+                  Notifications ({notifications.length})
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setIsNotificationsOpen(false)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100 text-neutral-500 transition-colors hover:bg-neutral-200"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {notifications.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-neutral-400">
+                    <Bell className="mb-2 opacity-50" size={32} />
+                    <p className="text-sm">No new notifications</p>
+                  </div>
+                ) : (
+                  notifications.map((notification) => {
+                    const Icon = notification.icon;
+                    const colorMap = {
+                      'brand': 'bg-brand-50 border-brand-100 text-brand-900 icon-text-brand-600 desc-text-brand-700',
+                      'orange': 'bg-orange-50 border-orange-100 text-orange-900 icon-text-orange-600 desc-text-orange-700',
+                      'green': 'bg-[#f0ece4] border-[#c4c8bc] text-[#2a6038] icon-text-[#2a6038] desc-text-[#2a6038]/80'
+                    } as Record<string, string>;
+                    
+                    const colors = colorMap[notification.colorClass] || colorMap['brand'];
+                    const [bg, border, titleColor, iconColor, descColor] = colors.split(' ');
+
+                    return (
+                      <div key={notification.id} className={`p-4 rounded-2xl border flex flex-col gap-3 ${bg} ${border}`}>
+                        <div className="flex gap-3">
+                          <div className={`mt-0.5 ${iconColor.replace('icon-text-', 'text-')}`}>
+                            <Icon size={20} />
+                          </div>
+                          <div>
+                            <h4 className={`font-bold text-sm ${titleColor}`}>{notification.title}</h4>
+                            <p className={`text-sm mt-1 ${descColor.replace('desc-text-', 'text-')}`}>{notification.message}</p>
+                            <p className="text-xs opacity-70 mt-2">{notification.time}</p>
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-2 mt-1">
+                          <button
+                            onClick={() => handleIgnoreNotification(notification.id)}
+                            className="px-3 py-1.5 text-xs font-semibold rounded-full bg-white/50 border border-black/5 hover:bg-white/80 transition-colors"
+                          >
+                            Ignore
+                          </button>
+                          <button
+                            onClick={() => handleReadNotification(notification.id)}
+                            className="px-3 py-1.5 text-xs font-bold rounded-full bg-white shadow-sm border border-black/10 hover:shadow transition-all text-brand-700"
+                          >
+                            Read
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
               </div>
             </motion.aside>
           </>

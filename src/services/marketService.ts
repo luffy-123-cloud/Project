@@ -153,16 +153,60 @@ const buildPrices = (records: AgmarknetRecord[], commodityFilter?: string, mandi
 
 export const hasLiveMarketApi = () => apiAvailability.hasAgmarknetKey
 
+// ---------------------------------------------------------------------------
+// Belgaum-area Karnataka mandis: Belagavi APMC, Bailhongal, Gadag, Hubli, Dharwad
+// Each entry carries distinct minPrice / maxPrice so the snapshot shows a
+// realistic spread rather than the same value for min / avg / max.
+// ---------------------------------------------------------------------------
 export const getMockMarketPrices = (): MarketPrice[] => [
-  { id: '1', commodity: 'Tomato', mandi: 'Belagavi Mandi', state: 'Karnataka', pricePerQuintal: 1200, trend: 'up', trendPercent: 8, updatedAt: new Date().toISOString(), color: 'green' },
-  { id: '1-1', commodity: 'Tomato', mandi: 'Gokak APMC', state: 'Karnataka', pricePerQuintal: 1130, trend: 'down', trendPercent: -5, updatedAt: new Date().toISOString(), color: 'red' },
-  { id: '1-2', commodity: 'Tomato', mandi: 'Hukkeri APMC', state: 'Karnataka', pricePerQuintal: 1060, trend: 'stable', trendPercent: 0, updatedAt: new Date().toISOString(), color: 'yellow' },
-  { id: '2', commodity: 'Wheat', mandi: 'Belagavi Mandi', state: 'Karnataka', pricePerQuintal: 2400, trend: 'up', trendPercent: 2, updatedAt: new Date().toISOString(), color: 'green' },
-  { id: '2-1', commodity: 'Wheat', mandi: 'Gokak APMC', state: 'Karnataka', pricePerQuintal: 2330, trend: 'down', trendPercent: -1, updatedAt: new Date().toISOString(), color: 'red' },
-  { id: '3', commodity: 'Rice', mandi: 'Belagavi Mandi', state: 'Karnataka', pricePerQuintal: 4500, trend: 'stable', trendPercent: 0, updatedAt: new Date().toISOString(), color: 'yellow' },
-  { id: '4', commodity: 'Onion', mandi: 'Lasalgaon', state: 'Maharashtra', pricePerQuintal: 890, trend: 'down', trendPercent: -5, updatedAt: new Date().toISOString(), color: 'red' },
-  { id: '5', commodity: 'Soybean', mandi: 'Indore', state: 'Madhya Pradesh', pricePerQuintal: 4200, trend: 'down', trendPercent: -2, updatedAt: new Date().toISOString(), color: 'red' },
-  { id: '6', commodity: 'Cotton', mandi: 'Nagpur', state: 'Maharashtra', pricePerQuintal: 6800, trend: 'up', trendPercent: 5, updatedAt: new Date().toISOString(), color: 'green' },
+  // ── Wheat ──────────────────────────────────────────────────────────────────
+  { id: 'w-blg', commodity: 'Wheat', mandi: 'Belagavi APMC', state: 'Karnataka', pricePerQuintal: 2320, trend: 'up',     trendPercent: 3,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 2180, maxPrice: 2480 },
+  { id: 'w-bhl', commodity: 'Wheat', mandi: 'Bailhongal',    state: 'Karnataka', pricePerQuintal: 2260, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 2120, maxPrice: 2400 },
+  { id: 'w-gag', commodity: 'Wheat', mandi: 'Gadag',         state: 'Karnataka', pricePerQuintal: 2190, trend: 'down',   trendPercent: -2, updatedAt: new Date().toISOString(), color: 'red',    minPrice: 2050, maxPrice: 2350 },
+  { id: 'w-hub', commodity: 'Wheat', mandi: 'Hubli',         state: 'Karnataka', pricePerQuintal: 2290, trend: 'up',     trendPercent: 1,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 2150, maxPrice: 2430 },
+  { id: 'w-dhr', commodity: 'Wheat', mandi: 'Dharwad',       state: 'Karnataka', pricePerQuintal: 2240, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 2100, maxPrice: 2380 },
+
+  // ── Rice ───────────────────────────────────────────────────────────────────
+  { id: 'r-blg', commodity: 'Rice', mandi: 'Belagavi APMC', state: 'Karnataka', pricePerQuintal: 2850, trend: 'up',     trendPercent: 4,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 2650, maxPrice: 3050 },
+  { id: 'r-bhl', commodity: 'Rice', mandi: 'Bailhongal',    state: 'Karnataka', pricePerQuintal: 2780, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 2580, maxPrice: 2980 },
+  { id: 'r-gag', commodity: 'Rice', mandi: 'Gadag',         state: 'Karnataka', pricePerQuintal: 2720, trend: 'down',   trendPercent: -3, updatedAt: new Date().toISOString(), color: 'red',    minPrice: 2520, maxPrice: 2920 },
+  { id: 'r-hub', commodity: 'Rice', mandi: 'Hubli',         state: 'Karnataka', pricePerQuintal: 2810, trend: 'up',     trendPercent: 2,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 2610, maxPrice: 3010 },
+  { id: 'r-dhr', commodity: 'Rice', mandi: 'Dharwad',       state: 'Karnataka', pricePerQuintal: 2760, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 2560, maxPrice: 2960 },
+
+  // ── Maize ──────────────────────────────────────────────────────────────────
+  { id: 'm-blg', commodity: 'Maize', mandi: 'Belagavi APMC', state: 'Karnataka', pricePerQuintal: 1680, trend: 'up',     trendPercent: 5,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 1540, maxPrice: 1820 },
+  { id: 'm-bhl', commodity: 'Maize', mandi: 'Bailhongal',    state: 'Karnataka', pricePerQuintal: 1620, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 1480, maxPrice: 1760 },
+  { id: 'm-gag', commodity: 'Maize', mandi: 'Gadag',         state: 'Karnataka', pricePerQuintal: 1570, trend: 'down',   trendPercent: -4, updatedAt: new Date().toISOString(), color: 'red',    minPrice: 1430, maxPrice: 1710 },
+  { id: 'm-hub', commodity: 'Maize', mandi: 'Hubli',         state: 'Karnataka', pricePerQuintal: 1650, trend: 'up',     trendPercent: 2,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 1510, maxPrice: 1790 },
+  { id: 'm-dhr', commodity: 'Maize', mandi: 'Dharwad',       state: 'Karnataka', pricePerQuintal: 1600, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 1460, maxPrice: 1740 },
+
+  // ── Tomato ─────────────────────────────────────────────────────────────────
+  { id: 't-blg', commodity: 'Tomato', mandi: 'Belagavi APMC', state: 'Karnataka', pricePerQuintal: 1420, trend: 'up',     trendPercent: 7,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 1200, maxPrice: 1640 },
+  { id: 't-bhl', commodity: 'Tomato', mandi: 'Bailhongal',    state: 'Karnataka', pricePerQuintal: 1360, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 1140, maxPrice: 1580 },
+  { id: 't-gag', commodity: 'Tomato', mandi: 'Gadag',         state: 'Karnataka', pricePerQuintal: 1290, trend: 'down',   trendPercent: -6, updatedAt: new Date().toISOString(), color: 'red',    minPrice: 1070, maxPrice: 1510 },
+  { id: 't-hub', commodity: 'Tomato', mandi: 'Hubli',         state: 'Karnataka', pricePerQuintal: 1390, trend: 'up',     trendPercent: 3,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 1170, maxPrice: 1610 },
+  { id: 't-dhr', commodity: 'Tomato', mandi: 'Dharwad',       state: 'Karnataka', pricePerQuintal: 1330, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 1110, maxPrice: 1550 },
+
+  // ── Onion ──────────────────────────────────────────────────────────────────
+  { id: 'o-blg', commodity: 'Onion', mandi: 'Belagavi APMC', state: 'Karnataka', pricePerQuintal: 1150, trend: 'up',     trendPercent: 6,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 950,  maxPrice: 1350 },
+  { id: 'o-bhl', commodity: 'Onion', mandi: 'Bailhongal',    state: 'Karnataka', pricePerQuintal: 1080, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 880,  maxPrice: 1280 },
+  { id: 'o-gag', commodity: 'Onion', mandi: 'Gadag',         state: 'Karnataka', pricePerQuintal: 1020, trend: 'down',   trendPercent: -5, updatedAt: new Date().toISOString(), color: 'red',    minPrice: 820,  maxPrice: 1220 },
+  { id: 'o-hub', commodity: 'Onion', mandi: 'Hubli',         state: 'Karnataka', pricePerQuintal: 1110, trend: 'up',     trendPercent: 2,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 910,  maxPrice: 1310 },
+  { id: 'o-dhr', commodity: 'Onion', mandi: 'Dharwad',       state: 'Karnataka', pricePerQuintal: 1060, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 860,  maxPrice: 1260 },
+
+  // ── Soybean ────────────────────────────────────────────────────────────────
+  { id: 's-blg', commodity: 'Soybean', mandi: 'Belagavi APMC', state: 'Karnataka', pricePerQuintal: 4480, trend: 'up',     trendPercent: 3,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 4200, maxPrice: 4760 },
+  { id: 's-bhl', commodity: 'Soybean', mandi: 'Bailhongal',    state: 'Karnataka', pricePerQuintal: 4390, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 4110, maxPrice: 4670 },
+  { id: 's-gag', commodity: 'Soybean', mandi: 'Gadag',         state: 'Karnataka', pricePerQuintal: 4310, trend: 'down',   trendPercent: -2, updatedAt: new Date().toISOString(), color: 'red',    minPrice: 4030, maxPrice: 4590 },
+  { id: 's-hub', commodity: 'Soybean', mandi: 'Hubli',         state: 'Karnataka', pricePerQuintal: 4450, trend: 'up',     trendPercent: 1,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 4170, maxPrice: 4730 },
+  { id: 's-dhr', commodity: 'Soybean', mandi: 'Dharwad',       state: 'Karnataka', pricePerQuintal: 4360, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 4080, maxPrice: 4640 },
+
+  // ── Cotton ─────────────────────────────────────────────────────────────────
+  { id: 'c-blg', commodity: 'Cotton', mandi: 'Belagavi APMC', state: 'Karnataka', pricePerQuintal: 7100, trend: 'up',     trendPercent: 4,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 6700, maxPrice: 7500 },
+  { id: 'c-bhl', commodity: 'Cotton', mandi: 'Bailhongal',    state: 'Karnataka', pricePerQuintal: 6980, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 6580, maxPrice: 7380 },
+  { id: 'c-gag', commodity: 'Cotton', mandi: 'Gadag',         state: 'Karnataka', pricePerQuintal: 6850, trend: 'down',   trendPercent: -3, updatedAt: new Date().toISOString(), color: 'red',    minPrice: 6450, maxPrice: 7250 },
+  { id: 'c-hub', commodity: 'Cotton', mandi: 'Hubli',         state: 'Karnataka', pricePerQuintal: 7050, trend: 'up',     trendPercent: 2,  updatedAt: new Date().toISOString(), color: 'green',  minPrice: 6650, maxPrice: 7450 },
+  { id: 'c-dhr', commodity: 'Cotton', mandi: 'Dharwad',       state: 'Karnataka', pricePerQuintal: 6920, trend: 'stable', trendPercent: 0,  updatedAt: new Date().toISOString(), color: 'yellow', minPrice: 6520, maxPrice: 7320 },
 ]
 
 export interface FetchMarketOptions {

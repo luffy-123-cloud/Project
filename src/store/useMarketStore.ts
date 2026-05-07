@@ -7,6 +7,8 @@ export interface MarketPrice {
   mandi: string
   state: string
   pricePerQuintal: number
+  minPrice?: number
+  maxPrice?: number
   trend: 'up' | 'down' | 'stable'
   trendPercent: number
   updatedAt: string

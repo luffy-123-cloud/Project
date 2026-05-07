@@ -50,7 +50,7 @@ export default function Marketplace() {
     crop: 'Maize',
     quantity: '',
     price: '',
-    location: '',
+    location: 'Belagavi, Karnataka',
   })
   const [recentListings, setRecentListings] = useState<ListingPreview[]>([])
 
@@ -284,26 +284,33 @@ export default function Marketplace() {
             {summary.nearbyMandis.map((mandi) => (
               <div
                 key={`${mandi.mandi}-${mandi.state}`}
-                className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white px-4 py-3"
+                className="rounded-2xl border border-neutral-200 bg-white px-4 py-3"
               >
-                <div className="min-w-0">
-                  <p className="font-semibold text-neutral-900">{mandi.mandi}</p>
-                  <p className="text-xs text-neutral-500">{mandi.state}</p>
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-neutral-900">{mandi.mandi}</p>
+                    <p className="text-xs text-neutral-500">{mandi.state}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-neutral-900">{formatMoney(mandi.pricePerQuintal)}</p>
+                    <p
+                      className={`text-xs font-semibold ${
+                        mandi.color === 'green'
+                          ? 'text-emerald-600'
+                          : mandi.color === 'red'
+                            ? 'text-red-600'
+                            : 'text-amber-600'
+                      }`}
+                    >
+                      {mandi.trend === 'up' ? '+' : mandi.trend === 'down' ? '' : ''}
+                      {mandi.trendPercent}% this week
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-neutral-900">{formatMoney(mandi.pricePerQuintal)}</p>
-                  <p
-                    className={`text-xs font-semibold ${
-                      mandi.color === 'green'
-                        ? 'text-emerald-600'
-                        : mandi.color === 'red'
-                          ? 'text-red-600'
-                          : 'text-amber-600'
-                    }`}
-                  >
-                    {mandi.trend === 'up' ? '+' : mandi.trend === 'down' ? '' : ''}
-                    {mandi.trendPercent}% this week
-                  </p>
+                <div className="mt-2 flex gap-3 text-xs text-neutral-500 border-t border-neutral-100 pt-2">
+                  <span>Min: <strong className="text-amber-700">{formatMoney(mandi.minPrice)}</strong></span>
+                  <span>Avg: <strong className="text-emerald-700">{formatMoney(mandi.pricePerQuintal)}</strong></span>
+                  <span>Max: <strong className="text-sky-700">{formatMoney(mandi.maxPrice)}</strong></span>
                 </div>
               </div>
             ))}

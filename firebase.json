@@ -1,15 +1,11 @@
 {
-  "firestore": [
-    {
-      "database": "sarpanch-ai",
-      "rules": "firestore.rules"
-    }
-  ],
+  "firestore": {
+    "rules": "firestore.rules"
+  },
   "storage": {
     "rules": "storage.rules"
   },
   "hosting": {
-    "site": "sarpanch-ai",
     "public": "dist",
     "ignore": [
       "firebase.json",

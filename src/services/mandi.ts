@@ -13,6 +13,8 @@ export interface MandiComparison {
   state: string
   district?: string
   pricePerQuintal: number
+  minPrice: number
+  maxPrice: number
   trend: MarketPrice['trend']
   trendPercent: number
   color: MarketPrice['color']
@@ -72,11 +74,14 @@ const summarize = (crop: string, prices: MarketPrice[], location?: MandiLocation
     .map((item) => item.updatedAt)
     .sort((left, right) => right.localeCompare(left))[0]
 
+  const allMins = matches.map(m => m.minPrice ?? m.pricePerQuintal)
+  const allMaxs = matches.map(m => m.maxPrice ?? m.pricePerQuintal)
+
   return {
     crop,
     locationLabel: makeLocationLabel(location),
-    minPrice: Math.min(...priceValues),
-    maxPrice: Math.max(...priceValues),
+    minPrice: Math.min(...allMins),
+    maxPrice: Math.max(...allMaxs),
     avgPrice: Math.round(total / priceValues.length),
     updatedAt: latestUpdatedAt || new Date().toISOString(),
     isLiveData: true,
@@ -84,6 +89,8 @@ const summarize = (crop: string, prices: MarketPrice[], location?: MandiLocation
       mandi: item.mandi,
       state: item.state,
       pricePerQuintal: item.pricePerQuintal,
+      minPrice: item.minPrice ?? item.pricePerQuintal,
+      maxPrice: item.maxPrice ?? item.pricePerQuintal,
       trend: item.trend,
       trendPercent: item.trendPercent,
       color: item.color,
@@ -165,6 +172,8 @@ export async function getNearbyMandiComparison(
       mandi: price.mandi,
       state: price.state,
       pricePerQuintal: price.pricePerQuintal,
+      minPrice: price.minPrice ?? price.pricePerQuintal,
+      maxPrice: price.maxPrice ?? price.pricePerQuintal,
       trend: price.trend,
       trendPercent: price.trendPercent,
       color: price.color,
