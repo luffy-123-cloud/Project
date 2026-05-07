@@ -270,6 +270,7 @@
     .bottom-nav {
       @apply border-t border-neutral-200;
     }
+
     .bottom-nav-inner {
       max-width: 640px;
     }

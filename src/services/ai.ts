@@ -1,6 +1,8 @@
 import type { FarmerProfile } from '../store/useAuthStore'
 import { generateAiText } from './gemini/geminiClient'
 import { detectSpeechLanguage } from '../utils/speechLanguage'
+import { getMandiPrice } from './mandi'
+import { fetchCurrentWeather, fetchForecast } from './weatherService'
 
 type ChatTurn = { role: 'user' | 'model'; content: string }
 
@@ -24,12 +26,12 @@ const LANGUAGE_LABELS: Record<string, string> = {
 const getLanguageLabel = (language: string) => LANGUAGE_LABELS[language] || 'Hindi'
 
 const buildFarmerContext = (farmer?: Partial<FarmerAIContext> | null) => {
-  if (!farmer) return 'Farmer profile unavailable. Assume a small Indian farmer.'
+  if (!farmer) return 'Farmer profile unavailable. Assume a small Indian farmer in Belgaum, Karnataka.'
 
   return [
     `Name: ${farmer.name || 'Farmer'}`,
-    `State: ${farmer.state || 'Unknown'}`,
-    `District: ${farmer.district || 'Unknown'}`,
+    `State: ${farmer.state || 'Karnataka'}`,
+    `District: ${farmer.district || 'Belagavi'}`,
     `Village: ${farmer.village || 'Unknown'}`,
     `Land holding: ${farmer.landHolding || 'Unknown'}`,
     `Main crops: ${farmer.crops?.join(', ') || 'Not specified'}`,
@@ -59,33 +61,92 @@ export async function askSarpanchSalah(params: {
   language: string
   farmer?: Partial<FarmerAIContext> | null
   history?: ChatTurn[]
+  coords?: { lat: number; lon: number }
 }) {
   const languageProfile = detectSpeechLanguage(params.question, params.language)
-  const systemPrompt = `You are Sarpanch Salah, a trusted farming expert for Indian farmers.
-The app language is ${getLanguageLabel(params.language)}, but the farmer's latest message decides the reply language.
-Detected latest message language: ${languageProfile.label}${languageProfile.isMixed ? ' mixed with English' : ''}.
-Language rule: ${languageProfile.instruction}
-Rules:
-- Keep every answer under 5 short lines.
-- Be practical and step-based when useful.
-- Prefer cost-aware, low-risk advice.
-- If information is missing, ask only one short question.
-- Match the farmer's script and style. Hindi voice should get Hindi, English should get English, Kannada should get Kannada, and mixed input should get the same natural mix.
-- Use clear speakable sentences. Avoid symbols, markdown, tables, long lists, and heavy punctuation because the answer will be read aloud.
-- Plain text only. No markdown. No long explanations.`
+  
+  // Dynamic Data Integration
+  let additionalContext = ''
+  
+  try {
+    const questionLower = params.question.toLowerCase()
+    const isMarketQuery = /price|mandi|rate|sell|bhav|market|kimat|daam|bazaar/i.test(params.question)
+    const isWeatherQuery = /rain|weather|temperature|forecast|barish|mosam|hava|pani|vataru/i.test(params.question)
+    
+    if (isMarketQuery) {
+      // Find all crops to query: those mentioned in question OR all from profile if generic market query
+      const profileCrops = params.farmer?.crops || []
+      const mentionedCrops = profileCrops.filter(crop => questionLower.includes(crop.toLowerCase()))
+      
+      // If a specific crop like "Tomato" is asked but not in profile, add it to search
+      const commonCrops = ['Tomato', 'Onion', 'Potato', 'Wheat', 'Rice', 'Cotton', 'Maize', 'Soybean', 'Chilli']
+      commonCrops.forEach(c => {
+        if (questionLower.includes(c.toLowerCase()) && !mentionedCrops.includes(c)) {
+          mentionedCrops.push(c)
+        }
+      })
 
-  const userMessage = `Farmer context:
+      const targetCrops = mentionedCrops.length > 0 ? mentionedCrops : (profileCrops.length > 0 ? profileCrops : ['Wheat'])
+      
+      additionalContext += '\n--- MANDI INTELLIGENCE ---'
+      for (const crop of targetCrops.slice(0, 5)) { // Limit to 5 crops to cover more listed items
+        const mandiData = await getMandiPrice(crop, {
+          state: params.farmer?.state,
+          district: params.farmer?.district
+        })
+        
+        if (mandiData.isLiveData) {
+          additionalContext += `\nCrop: ${crop}. Max: ₹${mandiData.maxPrice}, Avg: ₹${mandiData.avgPrice} (Quintal).`
+          if (mandiData.nearbyMandis?.length) {
+            const specificMandis = mandiData.nearbyMandis.slice(0, 4).map(m => `${m.mandi} (₹${m.pricePerQuintal})`).join(', ')
+            additionalContext += ` Specific Mandis: ${specificMandis}.`
+          }
+        } else {
+          additionalContext += `\nCrop: ${crop}. Live market data currently unavailable for your specific district, using state averages.`
+        }
+      }
+    }
+    
+    if (isWeatherQuery && params.coords) {
+      const weather = await fetchCurrentWeather(params.coords.lat, params.coords.lon, params.language)
+      additionalContext += `\n--- WEATHER DATA ---\nTemperature: ${weather.temp}°C, Condition: ${weather.description}. Humidity: ${weather.humidity}%.`
+    }
+  } catch (e) {
+    console.warn('Context fetching failed', e)
+  }
+
+  const systemPrompt = `You are Sarpanch AI, a high-fidelity agricultural operating system copilot.
+Your goal is to provide elite agricultural intelligence.
+
+INTERNAL CONFIG (DO NOT ECHO IN RESPONSE):
+- Target Language: ${languageProfile.label}
+- Target Script: ${languageProfile.isMixed || !languageProfile.instruction.includes('native') ? 'Latin/Latin' : 'Native/Native'}
+- Style Guide: ${languageProfile.instruction}
+
+CRITICAL RULES:
+1. MIRROR THE FARMER: You MUST reply in the EXACT language and script detected above.
+2. STAY ON TOPIC: You are strictly an agricultural assistant. If the user asks anything off-topic (non-farming, movies, politics, general chat, etc.), you MUST politely decline in the detected native language and script (e.g., if asked in Hindi, reply "मैं इस कार्य के लिए नियुक्त नहीं हूँ..." etc.). Your decline message should convey: "I am not assigned for that task. Please ask me about crops, mandis, or weather."
+3. NO ECHO: Never include internal metadata in your response.
+3. NO MARKDOWN: Use plain text only. Use 1., 2. for lists.
+4. CONCISE: Keep response under 90 words.
+5. MANDI: Always mention specific Mandi names and prices if asked.
+
+Today's Farmer Context:
 ${buildFarmerContext(params.farmer)}
+${additionalContext}
 
-Farmer question:
-${params.question}`
+Rules for ending:
+- For off-topic declines, just provide the decline message.
+- For all valid farming advice, always end with exactly one line: "Today's Farm Action: <one clear actionable step>"`
+
+  const userMessage = `Farmer question: ${params.question}`
 
   try {
     return await generateAiText({
       systemPrompt,
       userMessage,
       history: params.history,
-      model: ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'],
+      model: ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro'],
     })
   } catch (error) {
     console.warn('[AI] Sarpanch Salah fallback', error)

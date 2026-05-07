@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { askSarpanchSalah } from '../../services/ai'
 import { useLanguageStore, LANGUAGE_META, type SupportedLanguage } from '../../store/useLanguageStore'
 import { useAuthStore } from '../../store/useAuthStore'
+import { useLocationStore } from '../../store/useLocationStore'
 import { useVoiceAgent } from '../../hooks/useVoiceAgent'
 import VoiceOrb from '../../components/ui/VoiceOrb'
 
@@ -165,6 +166,8 @@ I will keep answers short, practical, and easy to act on.`,
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
+  const coords = useLocationStore(state => state.coords)
+
   const askAI = useCallback(
     async (question: string, messageSnapshot?: Message[]): Promise<string> => {
       const normalizedQuestion = question.replace(/\s+/g, ' ').trim()
@@ -183,6 +186,7 @@ I will keep answers short, practical, and easy to act on.`,
         language,
         farmer,
         history: toHistory(messageSnapshot || messagesRef.current),
+        coords: coords,
       })
 
       responseCacheRef.current.set(cacheKey, { value: response, expiresAt: now + RESPONSE_CACHE_TTL_MS })

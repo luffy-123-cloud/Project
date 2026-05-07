@@ -233,7 +233,8 @@ export function useVoiceAgent(
       return new Promise((resolve, reject) => {
         const utterance = new SpeechSynthesisUtterance(text)
         utterance.lang = LANG_BCP47[speechLanguage] || LANG_BCP47[language] || 'en-IN'
-        utterance.rate = speechLanguage === 'en' ? 0.9 : 0.86
+        // Slightly slower and calmer for the Sarpanch mentor persona
+        utterance.rate = 0.85
         utterance.pitch = 1
 
         const voices = window.speechSynthesis.getVoices()

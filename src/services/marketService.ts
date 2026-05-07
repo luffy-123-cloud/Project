@@ -154,19 +154,15 @@ const buildPrices = (records: AgmarknetRecord[], commodityFilter?: string, mandi
 export const hasLiveMarketApi = () => apiAvailability.hasAgmarknetKey
 
 export const getMockMarketPrices = (): MarketPrice[] => [
-  { id: '1', commodity: 'Tomato', mandi: 'Nashik', state: 'Maharashtra', pricePerQuintal: 1240, trend: 'up', trendPercent: 8, updatedAt: new Date().toISOString(), color: 'green' },
-  { id: '2', commodity: 'Onion', mandi: 'Lasalgaon', state: 'Maharashtra', pricePerQuintal: 890, trend: 'down', trendPercent: -5, updatedAt: new Date().toISOString(), color: 'red' },
-  { id: '3', commodity: 'Wheat', mandi: 'Delhi', state: 'Delhi', pricePerQuintal: 2150, trend: 'stable', trendPercent: 0, updatedAt: new Date().toISOString(), color: 'yellow' },
-  { id: '3-1', commodity: 'Wheat', mandi: 'Karnal', state: 'Haryana', pricePerQuintal: 2100, trend: 'down', trendPercent: -1, updatedAt: new Date().toISOString(), color: 'red' },
-  { id: '3-2', commodity: 'Wheat', mandi: 'Ludhiana', state: 'Punjab', pricePerQuintal: 2200, trend: 'up', trendPercent: 2, updatedAt: new Date().toISOString(), color: 'green' },
-  { id: '4', commodity: 'Potato', mandi: 'Agra', state: 'Uttar Pradesh', pricePerQuintal: 680, trend: 'up', trendPercent: 3, updatedAt: new Date().toISOString(), color: 'green' },
+  { id: '1', commodity: 'Tomato', mandi: 'Belagavi Mandi', state: 'Karnataka', pricePerQuintal: 1200, trend: 'up', trendPercent: 8, updatedAt: new Date().toISOString(), color: 'green' },
+  { id: '1-1', commodity: 'Tomato', mandi: 'Gokak APMC', state: 'Karnataka', pricePerQuintal: 1130, trend: 'down', trendPercent: -5, updatedAt: new Date().toISOString(), color: 'red' },
+  { id: '1-2', commodity: 'Tomato', mandi: 'Hukkeri APMC', state: 'Karnataka', pricePerQuintal: 1060, trend: 'stable', trendPercent: 0, updatedAt: new Date().toISOString(), color: 'yellow' },
+  { id: '2', commodity: 'Wheat', mandi: 'Belagavi Mandi', state: 'Karnataka', pricePerQuintal: 2400, trend: 'up', trendPercent: 2, updatedAt: new Date().toISOString(), color: 'green' },
+  { id: '2-1', commodity: 'Wheat', mandi: 'Gokak APMC', state: 'Karnataka', pricePerQuintal: 2330, trend: 'down', trendPercent: -1, updatedAt: new Date().toISOString(), color: 'red' },
+  { id: '3', commodity: 'Rice', mandi: 'Belagavi Mandi', state: 'Karnataka', pricePerQuintal: 4500, trend: 'stable', trendPercent: 0, updatedAt: new Date().toISOString(), color: 'yellow' },
+  { id: '4', commodity: 'Onion', mandi: 'Lasalgaon', state: 'Maharashtra', pricePerQuintal: 890, trend: 'down', trendPercent: -5, updatedAt: new Date().toISOString(), color: 'red' },
   { id: '5', commodity: 'Soybean', mandi: 'Indore', state: 'Madhya Pradesh', pricePerQuintal: 4200, trend: 'down', trendPercent: -2, updatedAt: new Date().toISOString(), color: 'red' },
   { id: '6', commodity: 'Cotton', mandi: 'Nagpur', state: 'Maharashtra', pricePerQuintal: 6800, trend: 'up', trendPercent: 5, updatedAt: new Date().toISOString(), color: 'green' },
-  { id: '7', commodity: 'Rice', mandi: 'Kolkata', state: 'West Bengal', pricePerQuintal: 1950, trend: 'stable', trendPercent: 0, updatedAt: new Date().toISOString(), color: 'yellow' },
-  { id: '8', commodity: 'Maize', mandi: 'Pune', state: 'Maharashtra', pricePerQuintal: 1380, trend: 'up', trendPercent: 4, updatedAt: new Date().toISOString(), color: 'green' },
-  { id: '8-1', commodity: 'Maize', mandi: 'Belagavi', state: 'Karnataka', pricePerQuintal: 1450, trend: 'stable', trendPercent: 0, updatedAt: new Date().toISOString(), color: 'yellow' },
-  { id: '8-2', commodity: 'Maize', mandi: 'Hubli', state: 'Karnataka', pricePerQuintal: 1320, trend: 'down', trendPercent: -3, updatedAt: new Date().toISOString(), color: 'red' },
-  { id: '8-3', commodity: 'Maize', mandi: 'Dharwad', state: 'Karnataka', pricePerQuintal: 1400, trend: 'up', trendPercent: 2, updatedAt: new Date().toISOString(), color: 'green' },
 ]
 
 export interface FetchMarketOptions {
@@ -197,18 +193,18 @@ export const fetchMarketPrices = async (mandiOrOptions?: string | FetchMarketOpt
       limit: opts.limit ?? env.agmarknetLimit,
     }
 
-    // Agmarknet uses filters[field_name] syntax for filtering
-    if (opts.commodity) params['filters[commodity]'] = opts.commodity
-    if (opts.state) params['filters[state]'] = opts.state
-    if (opts.district) params['filters[district]'] = opts.district
-    if (opts.mandi) params['filters[market]'] = opts.mandi
+    // Agmarknet uses filters[Field_Name] syntax for filtering (Case Sensitive)
+    if (opts.commodity) params['filters[Commodity]'] = opts.commodity
+    if (opts.state) params['filters[State]'] = opts.state
+    if (opts.district) params['filters[District]'] = opts.district
+    if (opts.mandi) params['filters[Market]'] = opts.mandi
 
     const { data } = await apiClient.get<AgmarknetResponse>(endpoint, { params })
 
     const prices = buildPrices(data.records ?? [], opts.commodity, opts.mandi)
 
     if (!prices.length) {
-      console.warn(`[Market] Agmarknet returned ${data.records?.length ?? 0} records but 0 parsed to valid prices. Check field mapping.`)
+      console.warn(`[Market] Agmarknet returned ${data.records?.length ?? 0} records but 0 parsed to valid prices.`)
       return getMockMarketPrices()
     }
 

@@ -8,7 +8,7 @@ const API_KEY = env.openWeatherApiKey
 const WEATHER_BASE = 'https://api.openweathermap.org/data/2.5'
 const GEO_BASE = 'https://api.openweathermap.org/geo/1.0'
 
-export const DEFAULT_LOCATION_COORDS = { lat: 22.9734, lon: 78.6569 }
+export const DEFAULT_LOCATION_COORDS = { lat: 15.8497, lon: 74.4977 }
 
 type OpenWeatherMain = {
   temp: number
@@ -151,7 +151,7 @@ export const getMockWeather = (language: SupportedLanguage = 'en'): WeatherData 
   description: language === 'hi' ? 'आंशिक बादल' : 'Partly cloudy',
   icon: 'Clouds',
   windSpeed: 4.8,
-  location: language === 'hi' ? 'मध्य भारत' : 'Central India',
+  location: language === 'hi' ? 'बेलागवी' : 'Belgaum',
   precipitationChance: 0.2,
   rainfallMm: 0,
 })
